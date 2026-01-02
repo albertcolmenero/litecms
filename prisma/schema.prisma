@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sites     Site[]
+  role      Role     @default(ADMIN)
+}
+
+enum Role {
+  ADMIN
+  SUPER_ADMIN
+}
+
+model Site {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  subdomain    String   @unique
+  customDomain String?  @unique
+  settings     Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pages        Page[]
+  assets       Asset[]
+  homePageId   String?  @unique
+  homePage     Page?    @relation("SiteHomePage", fields: [homePageId], references: [id])
+  menus        Menu[]
+
+  @@index([userId])
+}
+
+model Page {
+  id        String   @id @default(cuid())
+  title     String
+  slug      String   
+  content   String   @db.Text
+  description String?
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  siteId    String
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  siteHomePage Site?  @relation("SiteHomePage")
+
+  menuItems MenuItem[]
+
+  @@unique([siteId, slug])
+  @@index([siteId])
+}
+
+model Asset {
+  id        String   @id @default(cuid())
+  key       String
+  url       String
+  alt       String?
+  createdAt DateTime @default(now())
+  siteId    String
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  
+  @@index([siteId])
+}
+
+model Menu {
+  id        String     @id @default(cuid())
+  name      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  siteId    String
+  site      Site       @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  items     MenuItem[]
+
+  @@index([siteId])
+}
+
+model MenuItem {
+  id        String   @id @default(cuid())
+  label     String
+  url       String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  menuId    String
+  menu      Menu     @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  pageId    String?
+  page      Page?    @relation(fields: [pageId], references: [id])
+
+  @@index([menuId])
+}
