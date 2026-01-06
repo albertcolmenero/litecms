@@ -112,9 +112,9 @@ export default async function PublicSitePage({ params }: { params: Promise<{ sit
 
 
 
-            <main className="max-w-screen-xl mx-auto px-6 prose lg:prose-xl max-w-none prose-headings:text-[var(--theme-text)] prose-p:text-[var(--theme-text)] prose-strong:text-[var(--theme-text)] prose-a:text-[var(--theme-primary)]">
+            <main className="max-w-screen-xl mx-auto prose lg:prose-xl max-w-none prose-headings:text-[var(--theme-text)] prose-p:text-[var(--theme-text)] prose-strong:text-[var(--theme-text)] prose-a:text-[var(--theme-primary)]">
 
-                <MarkdownRenderer content={pageData.content} />
+                <MarkdownRenderer content={pageData.content} site={siteData} />
             </main>
 
             <footer className="mt-24 border-t border-[var(--theme-text)]/10 py-12 text-center text-sm opacity-60">

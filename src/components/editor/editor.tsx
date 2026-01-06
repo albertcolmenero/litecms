@@ -9,9 +9,10 @@ interface EditorProps {
     initialValue?: string;
     onChange?: (markdown: string) => void;
     editable?: boolean;
+    site?: any;
 }
 
-export function Editor({ initialValue = "", onChange }: EditorProps) {
+export function Editor({ initialValue = "", onChange, site }: EditorProps) {
     const [markdownContent, setMarkdownContent] = useState(initialValue);
     const [showGuide, setShowGuide] = useState(false);
 
@@ -30,7 +31,7 @@ export function Editor({ initialValue = "", onChange }: EditorProps) {
                 </div>
                 <div className="flex-1 overflow-y-auto p-8">
                     <div className="prose prose-lg dark:prose-invert max-w-none">
-                        <MarkdownRenderer content={markdownContent} />
+                        <MarkdownRenderer content={markdownContent} site={site} />
                     </div>
                 </div>
             </div>

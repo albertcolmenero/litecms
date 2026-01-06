@@ -31,17 +31,17 @@ export function Toolbar({ editor }: ToolbarProps) {
         }
 
         if (url === "") {
-            editor.chain().focus().extendMarkRange("link").unsetLink().run();
+            (editor.chain().focus().extendMarkRange("link") as any).unsetLink().run();
             return;
         }
 
-        editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+        (editor.chain().focus() as any).extendMarkRange("link").setLink({ href: url }).run();
     };
 
     const addImage = () => {
         const url = window.prompt("Image URL");
         if (url) {
-            editor.chain().focus().setImage({ src: url }).run();
+            (editor.chain().focus() as any).setImage({ src: url }).run();
         }
     };
 
@@ -71,7 +71,7 @@ export function Toolbar({ editor }: ToolbarProps) {
     return (
         <div className="flex items-center gap-1 border-b border-gray-200 p-2 mb-4 sticky top-0 bg-white z-10">
             <ToggleButton
-                onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+                onClick={() => (editor.chain().focus() as any).toggleHeading({ level: 1 }).run()}
                 isActive={editor.isActive("heading", { level: 1 })}
                 title="Heading 1"
             >
@@ -79,7 +79,7 @@ export function Toolbar({ editor }: ToolbarProps) {
             </ToggleButton>
 
             <ToggleButton
-                onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+                onClick={() => (editor.chain().focus() as any).toggleHeading({ level: 2 }).run()}
                 isActive={editor.isActive("heading", { level: 2 })}
                 title="Heading 2"
             >
@@ -89,7 +89,7 @@ export function Toolbar({ editor }: ToolbarProps) {
             <div className="w-px h-6 bg-gray-300 mx-1" />
 
             <ToggleButton
-                onClick={() => editor.chain().focus().toggleBold().run()}
+                onClick={() => (editor.chain().focus() as any).toggleBold().run()}
                 isActive={editor.isActive("bold")}
                 title="Bold"
             >
@@ -97,7 +97,7 @@ export function Toolbar({ editor }: ToolbarProps) {
             </ToggleButton>
 
             <ToggleButton
-                onClick={() => editor.chain().focus().toggleItalic().run()}
+                onClick={() => (editor.chain().focus() as any).toggleItalic().run()}
                 isActive={editor.isActive("italic")}
                 title="Italic"
             >
@@ -105,7 +105,7 @@ export function Toolbar({ editor }: ToolbarProps) {
             </ToggleButton>
 
             <ToggleButton
-                onClick={() => editor.chain().focus().toggleBlockquote().run()}
+                onClick={() => (editor.chain().focus() as any).toggleBlockquote().run()}
                 isActive={editor.isActive("blockquote")}
                 title="Quote"
             >
@@ -115,7 +115,7 @@ export function Toolbar({ editor }: ToolbarProps) {
             <div className="w-px h-6 bg-gray-300 mx-1" />
 
             <ToggleButton
-                onClick={() => editor.chain().focus().toggleBulletList().run()}
+                onClick={() => (editor.chain().focus() as any).toggleBulletList().run()}
                 isActive={editor.isActive("bulletList")}
                 title="Bullet List"
             >

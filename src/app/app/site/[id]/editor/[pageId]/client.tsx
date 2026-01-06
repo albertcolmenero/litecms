@@ -10,10 +10,12 @@ import Link from "next/link";
 
 export default function EditorClient({
     siteId,
-    page
+    page,
+    site
 }: {
     siteId: string;
-    page: { id: string; title: string; slug: string; content: string | null; published: boolean; menuItems?: any[] }
+    page: { id: string; title: string; slug: string; content: string | null; published: boolean; menuItems?: any[] };
+    site?: any;
 }) {
     const [content, setContent] = useState(page.content || "");
     const [status, setStatus] = useState<"saved" | "saving" | "unsaved">("saved");
@@ -81,6 +83,7 @@ export default function EditorClient({
                     <Editor
                         initialValue={page.content || ""}
                         onChange={handleUpdate}
+                        site={site}
                     />
                 </div>
             </main>

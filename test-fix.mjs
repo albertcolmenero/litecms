@@ -14,7 +14,6 @@ const processor = unified()
             } else if (node.type === 'text') {
                 process.stdout.write(`${spaces}TEXT: "${node.value.replace(/\n/g, '\\n')}"\n`);
             }
-
             if (node.children) {
                 node.children.forEach(c => printNode(c, indent + 1));
             }
@@ -22,26 +21,31 @@ const processor = unified()
         printNode(tree);
     });
 
-const inputIssue = `
+const inputNewline = `
 :::section{layout="100"}
   :::column
-    :::card
-      ### Nested Layout
-      :::section{layout="50-50"}
-        :::column
-          Left
-        :::
-        :::column
-          Right
-        :::
-      :::
-    :::
+    Inner
   :::
   :::column
     Right Sidebar
   :::
+
 :::
 `;
 
-console.log('--- Reproduction Attempt ---');
-processor.runSync(processor.parse(inputIssue));
+const inputFence = `
+::::section{layout="100"}
+  :::column
+    Inner
+  :::
+  :::column
+    Right Sidebar
+  :::
+::::
+`;
+
+console.log('--- Test 1: Extra Newline ---');
+processor.runSync(processor.parse(inputNewline));
+
+console.log('\n--- Test 2: Different Fence Length ---');
+processor.runSync(processor.parse(inputFence));

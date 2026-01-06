@@ -1,4 +1,4 @@
-import { getPage } from "@/app/actions";
+import { getPage, getSite } from "@/app/actions";
 import { notFound, redirect } from "next/navigation";
 import EditorClient from "./client";
 
@@ -15,7 +15,10 @@ export default async function EditorPage({ params }: EditorPageProps) {
     // Fetch page (includes security check in getPage)
     const page = await getPage(pageId);
 
-    if (!page) {
+    // Fetch site data for theme settings
+    const site = await getSite(siteId);
+
+    if (!page || !site) {
         notFound();
     }
 
@@ -26,5 +29,5 @@ export default async function EditorPage({ params }: EditorPageProps) {
         notFound();
     }
 
-    return <EditorClient siteId={siteId} page={page} />;
+    return <EditorClient siteId={siteId} page={page} site={site} />;
 }

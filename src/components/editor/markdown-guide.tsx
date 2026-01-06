@@ -41,14 +41,14 @@ menu:
                     <p className="mb-2">Use the following syntax to create multi-column layouts:</p>
 
                     <div className="bg-gray-100 p-2 rounded font-mono text-xs whitespace-pre overflow-x-auto border">
-                        {`:::::section{layout="50-50"}
-::::column
-Left Content...
-::::
-::::column
-Right Content...
-::::
-:::::`}
+                        {`::::section{layout="50-50"}
+  :::column
+    Left Content...
+  :::
+  :::column
+    Right Content...
+  :::
+::::`}
                     </div>
 
                     <div className="mt-4">
@@ -97,20 +97,64 @@ Card content goes here.
                 </section>
 
                 <section>
+                    <h4 className="font-semibold mb-2 text-black">Styling</h4>
+
+                    <div className="space-y-4">
+                        <div>
+                            <p className="mb-1 font-medium text-xs">Background Colors</p>
+                            <p className="mb-1 text-xs text-gray-500">Add <code>bg="color-id"</code> to Sections, Columns, or Cards. Top-level sections with backgrounds will span the full screen width.</p>
+                            <div className="bg-gray-100 p-2 rounded font-mono text-xs whitespace-pre overflow-x-auto border">
+                                {`::::section{layout="100" bg="primary"}
+  :::column{bg="background"}
+    Content on site background...
+  :::
+::::`}
+                            </div>
+                        </div>
+
+                        <div>
+                            <p className="mb-1 font-medium text-xs">Text Colors</p>
+                            <p className="mb-1 text-xs text-gray-500">Highlight text with site colors.</p>
+                            <div className="bg-gray-100 p-2 rounded font-mono text-xs whitespace-pre overflow-x-auto border">
+                                {`This contains :text[highlighted text]{color="primary"}.`}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
                     <h4 className="font-semibold mb-2 text-black">Troubleshooting</h4>
                     <ul className="list-disc list-inside space-y-2 text-xs text-gray-600">
                         <li>
                             <span className="font-semibold text-gray-800">Directives showing as text?</span>
                             <br />Check for syntax errors carefully.
-                            <br />❌ <code>:::::section{"{layout=\"33-33-33*}"}</code>
-                            <br />✅ <code>:::::section{"{layout=\"33-33-33\"}"}</code>
+                            <br />❌ <code>::::section{"{layout=\"33-33-33*}"}</code>
+                            <br />✅ <code>::::section{"{layout=\"33-33-33\"}"}</code>
                         </li>
                         <li>
                             <span className="font-semibold text-gray-800">Nesting Strategy</span>
-                            <br />Use different fence lengths for each level:
-                            <br />1. Section: <code>:::::</code> (5 colons)
-                            <br />2. Column: <code>::::</code> (4 colons)
-                            <br />3. Card: <code>:::</code> (3 colons)
+                            <br />To ensure infinite nesting works correctly, use <b>4 colons (::::)</b> for Sections and <b>3 colons (:::)</b> for Columns and Cards.
+                            <br />
+                            <div className="bg-gray-100 p-2 rounded font-mono text-xs whitespace-pre overflow-x-auto border mt-1">
+                                {`::::section{layout="40-60"}
+  :::column
+    :::card
+      ### Nested Layout
+      ::::section{layout="50-50"}
+        :::column
+          Left
+        :::
+        :::column
+          Right
+        :::
+      ::::
+    :::
+  :::
+  :::column
+    Right Sidebar
+  :::
+::::`}
+                            </div>
                         </li>
                         <li>
                             <span className="font-semibold text-gray-800">Spacing</span>
