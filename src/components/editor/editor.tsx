@@ -30,8 +30,12 @@ export function Editor({ initialValue = "", onChange, site }: EditorProps) {
                     <span>Preview</span>
                 </div>
                 <div className="flex-1 overflow-y-auto p-8">
-                    <div className="prose prose-lg dark:prose-invert max-w-none">
+                    <div className=" max-w-none" style={{
+                        "--breakout-width": "100%",
+                        "--breakout-offset": "50%"
+                    } as React.CSSProperties}>
                         <MarkdownRenderer content={markdownContent} site={site} />
+                        {/* <div className="text-gray-500">Preview Disabled for Debugging</div> */}
                     </div>
                 </div>
             </div>

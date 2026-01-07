@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Save, Plus, Trash } from "lucide-react";
 
-const GOOGLE_FONTS = [
+const FONT_OPTIONS = [
+    "Geist",
     "Roboto",
     "Open Sans",
     "Lato",
@@ -54,7 +55,13 @@ export default function SiteSettingsForm({ site }: SiteSettingsFormProps) {
         const themePrimary = formData.get("theme_primary") as string;
         const themeBackground = formData.get("theme_background") as string;
         const themeText = formData.get("theme_text") as string;
+        const themeIconBackground = formData.get("theme_icon_background") as string;
+        const themeIconColor = formData.get("theme_icon_color") as string;
         const themeFont = formData.get("theme_font") as string;
+        const themeButtonBackground = formData.get("theme_button_background") as string;
+        const themeButtonText = formData.get("theme_button_text") as string;
+        const themeButtonSecondaryBackground = formData.get("theme_button_secondary_background") as string;
+        const themeButtonSecondaryText = formData.get("theme_button_secondary_text") as string;
 
         const settings = (site.settings as any) || {};
         const newSettings = {
@@ -67,6 +74,14 @@ export default function SiteSettingsForm({ site }: SiteSettingsFormProps) {
                     primary: themePrimary,
                     background: themeBackground,
                     text: themeText,
+                    iconBackground: themeIconBackground,
+                    iconColor: themeIconColor,
+                },
+                buttons: {
+                    background: themeButtonBackground,
+                    text: themeButtonText,
+                    secondaryBackground: themeButtonSecondaryBackground,
+                    secondaryText: themeButtonSecondaryText,
                 },
                 customColors: customColors
             }
@@ -150,18 +165,18 @@ export default function SiteSettingsForm({ site }: SiteSettingsFormProps) {
                     <div className="flex gap-2">
                         <select
                             name="theme_font"
-                            defaultValue={(site.settings as any)?.theme?.font ?? GOOGLE_FONTS[0]}
+                            defaultValue={(site.settings as any)?.theme?.font ?? FONT_OPTIONS[0]}
                             className="w-full p-2 border rounded focus:ring-black focus:border-black"
                         >
                             <option value="">Default System Font</option>
-                            {GOOGLE_FONTS.map(font => (
-                                <option key={font} value={font} style={{ fontFamily: font }}>
+                            {FONT_OPTIONS.map(font => (
+                                <option key={font} value={font} style={{ fontFamily: font === "Geist" ? "var(--font-geist-sans)" : font }}>
                                     {font}
                                 </option>
                             ))}
                         </select>
                         <div className="text-xs text-gray-500 flex items-center">
-                            (Google Fonts)
+                            (Font Options)
                         </div>
                     </div>
                 </div>
@@ -201,6 +216,80 @@ export default function SiteSettingsForm({ site }: SiteSettingsFormProps) {
                                 className="w-10 h-10 p-1 border rounded cursor-pointer"
                             />
                             <span className="text-xs text-gray-500">text</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Button Background</label>
+                        <div className="flex items-center gap-2">
+                            <input
+                                name="theme_button_background"
+                                type="color"
+                                defaultValue={(site.settings as any)?.theme?.buttons?.background || "#000000"}
+                                className="w-10 h-10 p-1 border rounded cursor-pointer"
+                            />
+                            <span className="text-xs text-gray-500">btn-bg</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Button Text</label>
+                        <div className="flex items-center gap-2">
+                            <input
+                                name="theme_button_text"
+                                type="color"
+                                defaultValue={(site.settings as any)?.theme?.buttons?.text || "#ffffff"}
+                                className="w-10 h-10 p-1 border rounded cursor-pointer"
+                            />
+                            <span className="text-xs text-gray-500">btn-text</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Secondary Button Background</label>
+                        <div className="flex items-center gap-2">
+                            <input
+                                name="theme_button_secondary_background"
+                                type="color"
+                                defaultValue={(site.settings as any)?.theme?.buttons?.secondaryBackground || "#ffffff"}
+                                className="w-10 h-10 p-1 border rounded cursor-pointer"
+                            />
+                            <span className="text-xs text-gray-500">sec-btn-bg</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Secondary Button Text</label>
+                        <div className="flex items-center gap-2">
+                            <input
+                                name="theme_button_secondary_text"
+                                type="color"
+                                defaultValue={(site.settings as any)?.theme?.buttons?.secondaryText || "#000000"}
+                                className="w-10 h-10 p-1 border rounded cursor-pointer"
+                            />
+                            <span className="text-xs text-gray-500">sec-btn-text</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Icon Background</label>
+                        <div className="flex items-center gap-2">
+                            <input
+                                name="theme_icon_background"
+                                type="color"
+                                defaultValue={(site.settings as any)?.theme?.colors?.iconBackground || (site.settings as any)?.theme?.colors?.primary || "#2563eb"}
+                                className="w-10 h-10 p-1 border rounded cursor-pointer"
+                            />
+                            <span className="text-xs text-gray-500">icon-bg</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Icon Color</label>
+                        <div className="flex items-center gap-2">
+                            <input
+                                name="theme_icon_color"
+                                type="color"
+                                defaultValue={(site.settings as any)?.theme?.colors?.iconColor || "#ffffff"}
+                                className="w-10 h-10 p-1 border rounded cursor-pointer"
+                            />
+                            <span className="text-xs text-gray-500">icon-fg</span>
                         </div>
                     </div>
                 </div>
@@ -274,6 +363,6 @@ export default function SiteSettingsForm({ site }: SiteSettingsFormProps) {
                 <Save size={16} />
                 {isPending ? "Saving..." : "Save Changes"}
             </button>
-        </form>
+        </form >
     );
 }

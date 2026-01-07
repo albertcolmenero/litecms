@@ -56,6 +56,10 @@ export default async function PublicSitePage({ params }: { params: Promise<{ sit
         '--theme-primary': themeColors.primary || '#000000',
         '--theme-background': themeColors.background || '#ffffff',
         '--theme-text': themeColors.text || '#000000',
+        '--theme-button-background': settings?.theme?.buttons?.background || '#000000',
+        '--theme-button-text': settings?.theme?.buttons?.text || '#ffffff',
+        '--theme-button-secondary-background': settings?.theme?.buttons?.secondaryBackground || '#ffffff',
+        '--theme-button-secondary-text': settings?.theme?.buttons?.secondaryText || '#000000',
     } as React.CSSProperties;
 
     if (!pageData) {
@@ -97,22 +101,24 @@ export default async function PublicSitePage({ params }: { params: Promise<{ sit
 
     return (
         <div style={styleVariables} className="min-h-screen bg-[var(--theme-background)] text-[var(--theme-text)] transition-colors duration-200">
-            <header className="border-b border-[var(--theme-text)]/10 p-6 mb-8">
-                <div className="max-w-screen-xl mx-auto flex items-center justify-between">
-                    <a href="/" className="font-bold text-xl hover:opacity-80">{siteData.name}</a>
-                    <nav className="space-x-4 text-sm opacity-80">
-                        {navLinks.map((link: any) => (
-                            <a key={link.id} href={link.url} className="hover:opacity-100 hover:underline">
-                                {link.label}
-                            </a>
-                        ))}
-                    </nav>
+            <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="relative flex justify-between items-center h-16">
+                        <a href="/" className="font-bold text-xl hover:opacity-80">{siteData.name}</a>
+                        <nav className="hidden md:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 space-x-8">
+                            {navLinks.map((link: any) => (
+                                <a key={link.id} href={link.url} className="text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors">
+                                    {link.label}
+                                </a>
+                            ))}
+                        </nav>
+                    </div>
                 </div>
             </header>
 
 
 
-            <main className="max-w-screen-xl mx-auto prose lg:prose-xl max-w-none prose-headings:text-[var(--theme-text)] prose-p:text-[var(--theme-text)] prose-strong:text-[var(--theme-text)] prose-a:text-[var(--theme-primary)]">
+            <main className="max-w-screen-xl mx-auto  max-w-none mt-16 ">
 
                 <MarkdownRenderer content={pageData.content} site={siteData} />
             </main>

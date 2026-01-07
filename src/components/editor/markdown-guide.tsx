@@ -1,10 +1,59 @@
-
 "use client";
 
 export function MarkdownGuide() {
+    const copyToClipboard = () => {
+        const guideText = `
+You are an expert content creator for LiteCMS. Use the following syntax to generate high-quality landing pages.
+
+### Core Structure
+- Use YAML frontmatter for metadata (title, description).
+- Use standard Markdown for basic formatting.
+
+### Advanced Layouts
+Use \`::::section{layout="..."}\` for sections.
+- "100" (Default full width)
+- "50-50", "60-40", "40-60" (Two columns)
+- "33-33-33" (Three columns)
+- "20-60-20" (Centered content with margins)
+
+Inside sections, use \`:::column\` to wrap content.
+
+### Components
+- **Cards**: \`:::card\` wraps content in a styled card.
+- **Buttons**: \`::button[Label]{href="#" variant="primary|secondary"}\`
+- **Icons**: \`::icon{name="IconName"}\` (Lucide icon names)
+
+### Styling
+- **Backgrounds**: Add \`bg="primary|secondary|muted"\` to sections/cards.
+- **Alignment**: Add \`align="center|right|justify"\` to sections/columns.
+- **Text Color**: \`:text[Highlighed]{color="primary"}\`
+
+### Example
+::::section{layout="50-50" bg="muted"}
+  :::column
+    # Hero Title
+    ::button[Get Started]{href="/signup"}
+  :::
+  :::column{align="center"}
+    ::icon{name="Rocket" className="w-12 h-12 text-primary"}
+  :::
+::::
+`;
+        navigator.clipboard.writeText(guideText);
+        alert("Prompt copied to clipboard!");
+    };
+
     return (
-        <div className="bg-gray-50 border rounded-lg p-4 text-sm text-gray-700 h-full overflow-y-auto">
-            <h3 className="font-bold text-lg mb-4 text-black">Markdown Guide</h3>
+        <div className="bg-gray-50 border rounded-lg p-4 text-sm text-gray-700 h-full overflow-y-auto relative">
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="font-bold text-lg text-black">Markdown Guide</h3>
+                <button
+                    onClick={copyToClipboard}
+                    className="px-3 py-1 text-xs bg-black text-white rounded hover:bg-gray-800 transition-colors"
+                >
+                    Copy for LLM
+                </button>
+            </div>
 
             <div className="space-y-6">
                 <section>
@@ -58,8 +107,21 @@ menu:
                             <li><code>"60-40"</code> (Left wider)</li>
                             <li><code>"40-60"</code> (Right wider)</li>
                             <li><code>"33-33-33"</code> (Three columns)</li>
+                            <li><code>"20-60-20"</code> (Wide center column)</li>
                             <li><code>"100"</code> (Full width - default)</li>
                         </ul>
+                    </div>
+                </section>
+
+                <section>
+                    <h4 className="font-semibold mb-2 text-black">Icons</h4>
+                    <p className="mb-2">Insert Lucide icons. Note: Icons are now styled as floating feature icons (absolute positioned).</p>
+                    <div className="bg-gray-100 p-2 rounded font-mono text-xs whitespace-pre overflow-x-auto border">
+                        {`:::div{className="relative pl-16"}
+  ::icon{name="Rocket"}
+  ### Feature Title
+  Description...
+:::`}
                     </div>
                 </section>
 
@@ -80,7 +142,8 @@ Card content goes here.
                         <div>
                             <p className="mb-1 font-medium text-xs">Button</p>
                             <div className="bg-gray-100 p-2 rounded font-mono text-xs whitespace-pre overflow-x-auto border">
-                                {`::button[Click Me]{href="/contact"}`}
+                                {`::button[Primary]{href = "/contact"}
+                                ::button[Secondary]{href = "/about" variant="secondary"}`}
                             </div>
                         </div>
 
@@ -108,6 +171,16 @@ Card content goes here.
   :::column{bg="background"}
     Content on site background...
   :::
+::::`}
+                            </div>
+                        </div>
+
+                        <div>
+                            <p className="mb-1 font-medium text-xs">Alignment</p>
+                            <p className="mb-1 text-xs text-gray-500">Add <code>align="center|right|justify"</code> to Sections, Columns, or Cards.</p>
+                            <div className="bg-gray-100 p-2 rounded font-mono text-xs whitespace-pre overflow-x-auto border">
+                                {`::::section{align="center"}
+  Centered content...
 ::::`}
                             </div>
                         </div>
@@ -157,8 +230,9 @@ Card content goes here.
                             </div>
                         </li>
                         <li>
-                            <span className="font-semibold text-gray-800">Spacing</span>
-                            <br />Ensure you have blank lines around your directives if they aren't rendering correctly.
+                            <span className="font-semibold text-gray-800">Spacing & Indentation</span>
+                            <br />Ensure you have blank lines around your directives.
+                            <br /><b>Important:</b> Do not indent the closing <code>::::</code> or <code>:::</code>. They must be at the start of the line.
                         </li>
                     </ul>
                 </section>
