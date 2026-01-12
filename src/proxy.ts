@@ -36,6 +36,12 @@ export default clerkMiddleware(async (auth, req) => {
     hostname !== "app.localhost" &&
     hostname !== process.env.NEXT_PUBLIC_ROOT_DOMAIN
   ) {
+    // Determine if it's an API route (which should bypass subdomain rewrite)
+    if (url.pathname.startsWith('/api')) {
+      console.log(`[Proxy] API request on subdomain: ${url.pathname} - Passing through`);
+      return NextResponse.next();
+    }
+
     console.log(`[Proxy] Rewriting to /sites/${hostname}${path} (${Date.now() - start}ms)`);
     return NextResponse.rewrite(
       new URL(`/sites/${hostname}${path}`, req.url)

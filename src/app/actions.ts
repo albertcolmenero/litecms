@@ -201,7 +201,8 @@ export async function getSiteByDomain(domain: string) {
                     items: {
                         orderBy: { order: "asc" },
                         include: { page: true }
-                    }
+                    },
+                    ctas: true
                 }
             }
         },
@@ -448,7 +449,10 @@ export async function getMenus(siteId: string) {
 
     return prisma.menu.findMany({
         where: { siteId },
-        include: { items: { orderBy: { order: "asc" }, include: { page: true } } }
+        include: {
+            items: { orderBy: { order: "asc" }, include: { page: true } },
+            ctas: { orderBy: { createdAt: "asc" } }
+        }
     });
 }
 
@@ -459,7 +463,7 @@ export async function createMenu(siteId: string, name: string) {
     });
 }
 
-export async function upsertMenuItem(menuId: string, itemId: string | null, data: { label: string; url?: string; pageId?: string; order: number }) {
+export async function upsertMenuItem(menuId: string, itemId: string | null, data: { label: string; url?: string; pageId?: string; order: number; anchor?: string }) {
     if (itemId) {
         return prisma.menuItem.update({
             where: { id: itemId },
@@ -478,4 +482,39 @@ export async function deleteMenuItem(itemId: string) {
 
 export async function deleteMenu(menuId: string) {
     return prisma.menu.delete({ where: { id: menuId } });
+}
+
+export async function createMenuCta(menuId: string, data: { label: string; url: string; style: string }) {
+    return prisma.menuCta.create({
+        data: {
+            ...data,
+            menuId
+        }
+    });
+}
+
+export async function deleteMenuCta(ctaId: string) {
+    return prisma.menuCta.delete({ where: { id: ctaId } });
+}
+
+export async function getUsers() {
+    const user = await currentUser();
+    if (!user) return redirect("/sign-in");
+
+    const dbUser = await prisma.user.findUnique({
+        where: { clerkId: user.id },
+    });
+
+    if (!dbUser || dbUser.role !== "SUPER_ADMIN") {
+        return [];
+    }
+
+    return prisma.user.findMany({
+        orderBy: { createdAt: "desc" },
+        include: {
+            _count: {
+                select: { sites: true },
+            },
+        },
+    });
 }

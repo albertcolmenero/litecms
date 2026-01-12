@@ -39,8 +39,29 @@ model Site {
   homePageId   String?  @unique
   homePage     Page?    @relation("SiteHomePage", fields: [homePageId], references: [id])
   menus        Menu[]
+  forms        Form[]
+  blogPosts    BlogPost[]
 
   @@index([userId])
+}
+
+model BlogPost {
+  id          String    @id @default(cuid())
+  title       String?
+  slug        String
+  description String?
+  content     String?   @db.Text
+  image       String?
+  author      String?
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  siteId      String
+  site        Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, slug])
+  @@index([siteId])
 }
 
 model Page {
@@ -82,6 +103,7 @@ model Menu {
   siteId    String
   site      Site       @relation(fields: [siteId], references: [id], onDelete: Cascade)
   items     MenuItem[]
+  ctas      MenuCta[]
 
   @@index([siteId])
 }
@@ -90,6 +112,7 @@ model MenuItem {
   id        String   @id @default(cuid())
   label     String
   url       String?
+  anchor    String?
   order     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -99,4 +122,41 @@ model MenuItem {
   page      Page?    @relation(fields: [pageId], references: [id])
 
   @@index([menuId])
+}
+
+model MenuCta {
+  id        String   @id @default(cuid())
+  label     String
+  url       String
+  style     String   @default("primary") 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  menuId    String
+  menu      Menu     @relation(fields: [menuId], references: [id], onDelete: Cascade)
+
+  @@index([menuId])
+}
+
+model Form {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   @default("waitlist")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  siteId    String
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  leads     Lead[]
+
+  @@index([siteId])
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  email     String
+  data      Json?
+  createdAt DateTime @default(now())
+  formId    String
+  form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  @@index([formId])
 }

@@ -1,5 +1,9 @@
 import { getSiteByDomain, getPageBySiteAndSlug } from "@/app/actions";
+import { getPublicBlogPost } from "@/actions/blog";
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowLeft } from "lucide-react";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import matter from "gray-matter";
 import { Metadata } from "next";
@@ -16,6 +20,37 @@ async function fetchPageData(domain: string, slug?: string[]) {
             pageData = siteData.homePage;
         } else {
             pageData = await getPageBySiteAndSlug(siteData.id, "");
+        }
+    } else if (slug[0] === 'blog') {
+        if (slug.length === 1) {
+            // Handle Blog Index: /blog
+            pageData = {
+                title: "Blog",
+                description: "Recent posts",
+                content: `::::section{layout="100" align="center"}
+  :::column
+
+### Our Blog
+::blog-posts{count="10"}
+
+  :::
+::::`,
+                published: true,
+                slug: "blog"
+            }
+        } else {
+            // Handle Blog Post: /blog/[slug]
+            const postSlug = slug.slice(1).join('/');
+            const blogPost = await getPublicBlogPost(siteData.id, postSlug);
+
+            if (blogPost) {
+                // Adapt BlogPost to Page structure for the renderer
+                pageData = {
+                    ...blogPost,
+                    type: 'blog-post',
+                    content: blogPost.content || "", // Ensure string
+                };
+            }
         }
     } else {
         const pageSlug = slug.join("/");
@@ -87,7 +122,7 @@ export default async function PublicSitePage({ params }: { params: Promise<{ sit
         ? mainMenu.items.map((item: any) => ({
             id: item.id,
             label: item.label,
-            url: item.url || (item.page ? `/${item.page.slug}` : "#")
+            url: (item.url || (item.page ? `/${item.page.slug}` : "#")) + (item.anchor ? `#${item.anchor.replace('#', '')}` : "")
         }))
         : [];
 
@@ -112,6 +147,20 @@ export default async function PublicSitePage({ params }: { params: Promise<{ sit
                                 </a>
                             ))}
                         </nav>
+                        <div className="flex items-center gap-4">
+                            {mainMenu?.ctas?.map((cta: any) => (
+                                <a
+                                    key={cta.id}
+                                    href={cta.url}
+                                    className={`px-4 py-2 rounded text-sm font-medium transition-opacity hover:opacity-90 ${cta.style === 'secondary'
+                                        ? 'bg-[var(--theme-button-secondary-background)] text-[var(--theme-button-secondary-text)] border border-gray-200'
+                                        : 'bg-[var(--theme-button-background)] text-[var(--theme-button-text)]'
+                                        }`}
+                                >
+                                    {cta.label}
+                                </a>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </header>
@@ -119,8 +168,50 @@ export default async function PublicSitePage({ params }: { params: Promise<{ sit
 
 
             <main className="max-w-screen-xl mx-auto  max-w-none mt-16 ">
+                {pageData.type === 'blog-post' ? (
+                    <article className="mx-auto max-w-screen-xl px-6 lg:px-8 pt-20 pb-16">
 
-                <MarkdownRenderer content={pageData.content} site={siteData} />
+                        <div className="space-y-4 text-center mb-10">
+                            <div className="flex items-center justify-center gap-x-4 text-xs font-medium">
+                                <time dateTime={pageData.publishedAt ? new Date(pageData.publishedAt).toISOString() : ""} className="text-gray-500 dark:text-gray-400">
+                                    {pageData.publishedAt ? new Date(pageData.publishedAt).toLocaleDateString(undefined, {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    }) : "Draft"}
+                                </time>
+                                {/* Category is not yet in DB, using placeholder or omitting */}
+
+                            </div>
+                            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
+                                {pageData.title}
+                            </h1>
+                            <div className="flex items-center justify-center space-x-2 pt-2">
+                                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                    {pageData.author || "Admin"}
+                                </p>
+                            </div>
+                        </div>
+
+                        {pageData.image && (
+                            <div className="relative aspect-video w-full rounded-2xl overflow-hidden mb-12 bg-gray-100 dark:bg-gray-800 border dark:border-gray-800 shadow-sm">
+                                <Image
+                                    src={pageData.image}
+                                    alt={pageData.title}
+                                    fill
+                                    className="object-cover"
+                                    priority
+                                />
+                            </div>
+                        )}
+
+                        <div className="space-y-4  mb-10">
+                            <MarkdownRenderer content={pageData.content} site={siteData} />
+                        </div>
+                    </article>
+                ) : (
+                    <MarkdownRenderer content={pageData.content} site={siteData} />
+                )}
             </main>
 
             <footer className="mt-24 border-t border-[var(--theme-text)]/10 py-12 text-center text-sm opacity-60">

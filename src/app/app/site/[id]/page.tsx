@@ -40,6 +40,18 @@ export default async function SiteDetailPage({ params }: { params: Promise<{ id:
 
                     <div className="flex items-center gap-3">
                         <Link
+                            href={`/app/site/${site.id}/forms`}
+                            className="px-4 py-2 bg-white border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-sm"
+                        >
+                            Forms
+                        </Link>
+                        <Link
+                            href={`/app/site/${site.id}/leads`}
+                            className="px-4 py-2 bg-white border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-sm"
+                        >
+                            Leads
+                        </Link>
+                        <Link
                             href={`/app/site/${site.id}/menus`}
                             className="px-4 py-2 bg-white border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-sm"
                         >
@@ -50,6 +62,12 @@ export default async function SiteDetailPage({ params }: { params: Promise<{ id:
                             className="px-4 py-2 bg-white border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-sm"
                         >
                             Settings
+                        </Link>
+                        <Link
+                            href={`/app/site/${site.id}/blog`}
+                            className="px-4 py-2 bg-white border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-sm"
+                        >
+                            Blog
                         </Link>
                         <div className="pl-2 border-l border-gray-200 ml-1">
                             <UserButton />

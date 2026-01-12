@@ -51,24 +51,32 @@ export function remarkSections() {
                     if (isValidCount && isAllNumbers) {
                         // Mobile: Stack (grid-cols-1)
                         gridClass += ' grid-cols-' + parts.length;
-                        gridClass += ' sm:dynamic-grid';
-                        gridClass += ' sm:grid-cols-[' + parts.map((p: string) => `${p}%`).join('_') + ']';
 
-                        const template = parts.map((p: string) => `${p}%`).join(' ');
-                        addStyle(`--desktop-layout: ${template}`);
+                        // Check if all parts are equal numbers (e.g., 50-50, 33-33-33)
+                        const isEqual = parts.every((p: string) => p === parts[0]);
+
+                        if (isEqual) {
+                            gridClass += ` sm:grid-cols-${parts.length}`;
+                        } else {
+                            gridClass += ' sm:dynamic-grid';
+                            gridClass += ' sm:grid-cols-[' + parts.map((p: string) => `${p}%`).join('_') + ']';
+                            // Desktop variable for potential JS usage or custom CSS
+                            const template = parts.map((p: string) => `${p}%`).join(' ');
+                            addStyle(`--desktop-layout: ${template}`);
+                        }
                     } else {
                         // Fallback
-                        gridClass += ' grid-cols-1';
+                        gridClass += ' sm:grid-cols-1';
                     }
 
                     /*
-                    if (layout === '50-50') gridClass += ' grid-cols-2 sm:grid-cols-2';
-                    else if (layout === '10-90') gridClass += ' grid-cols-2 sm:grid-cols-[10%_90%]';    
-                    else if (layout === '90-10') gridClass += ' grid-cols-2 sm:grid-cols-[90%_10%]';
-                    else if (layout === '20-80') gridClass += ' grid-cols-2 sm:grid-cols-[20%_80%]';
-                    else if (layout === '80-20') gridClass += ' grid-cols-2 sm:grid-cols-[80%_20%]';
-                    else if (layout === '30-70') gridClass += ' grid-cols-2 sm:grid-cols-[30%_70%]';
-                    else if (layout === '70-30') gridClass += ' grid-cols-2 sm:grid-cols-[70%_30%]';
+                    if (layout === '50-50') gridClass += ' grid-cols-2 md:grid-cols-2';
+                    else if (layout === '10-90') gridClass += ' grid-cols-2 md:grid-cols-[10%_90%]';    
+                    else if (layout === '90-10') gridClass += ' grid-cols-2 md:grid-cols-[90%_10%]';
+                    else if (layout === '20-80') gridClass += ' grid-cols-2 md:grid-cols-[20%_80%]';
+                    else if (layout === '80-20') gridClass += ' grid-cols-2 md:grid-cols-[80%_20%]';
+                    else if (layout === '30-70') gridClass += ' grid-cols-2 md:grid-cols-[30%_70%]';
+                    else if (layout === '70-30') gridClass += ' grid-cols-2 md:grid-cols-[70%_30%]';
                     else if (layout === '60-40') gridClass += ' grid-cols-2 sm:grid-cols-[60%_40%]';
                     else if (layout === '40-60') gridClass += ' grid-cols-2 sm:grid-cols-[40%_60%]';
                     else if (layout === '33-33-33') gridClass += ' grid-cols-3 sm:grid-cols-3';
@@ -82,7 +90,7 @@ export function remarkSections() {
 
                     data.hName = 'div';
                     data.hProperties = {
-                        className: `w-full ${isTopLevel ? 'py-24' : 'pt-10'}  ${gridClass} ${alignClass}`.trim(),
+                        className: `w-full ${isTopLevel ? 'py-24 px-6 ' : 'pt-10'}  ${gridClass} ${alignClass}`.trim(),
                         ...attributes
                     };
 
@@ -122,7 +130,7 @@ export function remarkSections() {
                 if (node.name === 'card') {
                     data.hName = 'div';
                     data.hProperties = {
-                        className: `border rounded-xl p-6 shadow-sm bg-white dark:bg-neutral-900 dark:border-neutral-800 ${alignClass}`.trim(),
+                        className: `flex flex-col justify-between bg-white dark:bg-black p-6 mb-6 shadow-lg ring-1 ring-gray-900/5 dark:ring-white/10 rounded-2xl ${alignClass}`.trim(),
                         ...attributes
                     };
                     if (bg) {
@@ -182,6 +190,59 @@ export function remarkSections() {
                     if (color) {
                         addStyle(`color: var(--color-${color})`);
                     }
+                }
+
+                // Breakline Directive
+                if (node.name === 'breakline' || node.name === 'br') {
+                    const height = attributes.height || attributes.h;
+
+                    if (height) {
+                        // If height is specified, render a spacer div
+                        data.hName = 'div';
+                        data.hProperties = {
+                            className: 'w-full',
+                            ...attributes
+                        };
+
+                        // Check if height is a clear CSS value or needs units
+                        const heightValue = isNaN(Number(height)) ? height : `${height}rem`;
+                        addStyle(`height: ${heightValue}`);
+                    } else {
+                        // Default to simple line break
+                        data.hName = 'br';
+                        data.hProperties = { ...attributes };
+                    }
+                }
+
+                // Avatar Directive
+                if (node.name === 'avatar') {
+                    data.hName = 'div';
+                    data.hProperties = {
+                        className: 'h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-lg font-bold',
+                        ...attributes
+                    };
+                }
+                // Form Directive
+                if (node.name === 'form') {
+                    const id = attributes.id;
+                    if (id) {
+                        data.hName = 'form-component';
+                        data.hProperties = {
+                            id: id,
+                            className: 'my-8',
+                            ...attributes
+                        };
+                    }
+                }
+
+                // Blog Posts Directive
+                if (node.name === 'blog-posts') {
+                    data.hName = 'blog-posts-component';
+                    data.hProperties = {
+                        className: 'my-12',
+                        ...attributes,
+                        count: attributes.count ? parseInt(attributes.count) : 3,
+                    };
                 }
             }
         });

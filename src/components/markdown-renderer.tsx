@@ -8,6 +8,8 @@ import rehypeRaw from "rehype-raw";
 import { remarkSections } from "@/lib/remark-sections";
 import matter from "gray-matter";
 import * as LucideIcons from "lucide-react";
+import Form from "@/components/mdx/Form";
+import BlogPosts from "@/components/mdx/BlogPosts";
 
 interface MarkdownRendererProps {
     content: string;
@@ -102,7 +104,9 @@ export function MarkdownRenderer({ content, className, site }: MarkdownRendererP
                         h3: ({ node, ...props }: any) => <h3 className="mb-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl" {...props} />,
                         p: ({ node, ...props }: any) => <p className="text-base leading-8 text-gray-600 dark:text-gray-300 " {...props} />,
                         a: ({ node, ...props }: any) => <a className="font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500" {...props} />,
-                        "icon-component": IconComponent
+                        "icon-component": IconComponent,
+                        "form-component": Form,
+                        "blog-posts-component": (props: any) => <BlogPosts {...props} siteId={site?.id} />,
                     } as any}
                 >
                     {markdownBody}

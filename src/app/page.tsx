@@ -4,6 +4,7 @@ import { Features } from "@/components/home/Features";
 import { Pricing } from "@/components/home/Pricing";
 import { Testimonials } from "@/components/home/Testimonials";
 import { CTA } from "@/components/home/CTA";
+import { RecentPosts } from "@/components/home/RecentPosts";
 import { Footer } from "@/components/home/Footer";
 import { Metadata } from "next";
 
@@ -22,6 +23,7 @@ export default function Home() {
         <Features />
         <Pricing />
         <Testimonials />
+        <RecentPosts />
         <CTA />
       </main>
       <Footer />
