@@ -195,12 +195,10 @@ export default async function PublicSitePage({ params }: { params: Promise<{ sit
 
                         {pageData.image && (
                             <div className="relative aspect-video w-full rounded-2xl overflow-hidden mb-12 bg-gray-100 dark:bg-gray-800 border dark:border-gray-800 shadow-sm">
-                                <Image
+                                <img
                                     src={pageData.image}
                                     alt={pageData.title}
-                                    fill
-                                    className="object-cover"
-                                    priority
+                                    className="absolute inset-0 h-full w-full object-cover"
                                 />
                             </div>
                         )}
