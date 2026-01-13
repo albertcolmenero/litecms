@@ -202,7 +202,8 @@ export async function getSiteByDomain(domain: string) {
                         orderBy: { order: "asc" },
                         include: { page: true }
                     },
-                    ctas: true
+                    ctas: true,
+                    socialLinks: { orderBy: { createdAt: "asc" } }
                 }
             }
         },
@@ -451,7 +452,8 @@ export async function getMenus(siteId: string) {
         where: { siteId },
         include: {
             items: { orderBy: { order: "asc" }, include: { page: true } },
-            ctas: { orderBy: { createdAt: "asc" } }
+            ctas: { orderBy: { createdAt: "asc" } },
+            socialLinks: { orderBy: { createdAt: "asc" } }
         }
     });
 }
@@ -474,6 +476,17 @@ export async function upsertMenuItem(menuId: string, itemId: string | null, data
             data: { ...data, menuId }
         });
     }
+}
+
+export async function updateMenuItemOrder(updates: { id: string; order: number }[]) {
+    return prisma.$transaction(
+        updates.map(u =>
+            prisma.menuItem.update({
+                where: { id: u.id },
+                data: { order: u.order }
+            })
+        )
+    );
 }
 
 export async function deleteMenuItem(itemId: string) {
@@ -517,4 +530,17 @@ export async function getUsers() {
             },
         },
     });
+}
+
+export async function createSocialLink(menuId: string, data: { platform: string; url: string }) {
+    return prisma.socialLink.create({
+        data: {
+            ...data,
+            menuId
+        }
+    });
+}
+
+export async function deleteSocialLink(linkId: string) {
+    return prisma.socialLink.delete({ where: { id: linkId } });
 }

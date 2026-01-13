@@ -104,8 +104,21 @@ model Menu {
   site      Site       @relation(fields: [siteId], references: [id], onDelete: Cascade)
   items     MenuItem[]
   ctas      MenuCta[]
+  socialLinks SocialLink[]
 
   @@index([siteId])
+}
+
+model SocialLink {
+  id        String   @id @default(cuid())
+  platform  String   // e.g., "twitter", "linkedin", "github", "instagram", "facebook", "youtube"
+  url       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  menuId    String
+  menu      Menu     @relation(fields: [menuId], references: [id], onDelete: Cascade)
+
+  @@index([menuId])
 }
 
 model MenuItem {

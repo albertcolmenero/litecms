@@ -3,7 +3,20 @@ import { getPublicBlogPost } from "@/actions/blog";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, X, Linkedin, Facebook, Instagram, Youtube, Github, Link as LinkIcon } from "lucide-react";
+
+function SiteSocialIcon({ platform }: { platform: string }) {
+    switch (platform.toLowerCase()) {
+        case 'twitter':
+        case 'x': return <X size={20} />;
+        case 'linkedin': return <Linkedin size={20} />;
+        case 'facebook': return <Facebook size={20} />;
+        case 'instagram': return <Instagram size={20} />;
+        case 'youtube': return <Youtube size={20} />;
+        case 'github': return <Github size={20} />;
+        default: return <LinkIcon size={20} />;
+    }
+}
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import matter from "gray-matter";
 import { Metadata } from "next";
@@ -134,6 +147,8 @@ export default async function PublicSitePage({ params }: { params: Promise<{ sit
         }))
         : [];
 
+    const footerSocial = footerMenu?.socialLinks || [];
+
     return (
         <div style={styleVariables} className="min-h-screen bg-[var(--theme-background)] text-[var(--theme-text)] transition-colors duration-200">
             <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
@@ -165,8 +180,6 @@ export default async function PublicSitePage({ params }: { params: Promise<{ sit
                 </div>
             </header>
 
-
-
             <main className="max-w-screen-xl mx-auto  max-w-none mt-16 ">
                 {pageData.type === 'blog-post' ? (
                     <article className="mx-auto max-w-screen-xl px-6 lg:px-8 pt-20 pb-16">
@@ -180,8 +193,6 @@ export default async function PublicSitePage({ params }: { params: Promise<{ sit
                                         day: 'numeric'
                                     }) : "Draft"}
                                 </time>
-                                {/* Category is not yet in DB, using placeholder or omitting */}
-
                             </div>
                             <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
                                 {pageData.title}
@@ -212,16 +223,36 @@ export default async function PublicSitePage({ params }: { params: Promise<{ sit
                 )}
             </main>
 
-            <footer className="mt-24 border-t border-[var(--theme-text)]/10 py-12 text-center text-sm opacity-60">
-                <div className="mb-4 space-x-4">
-                    {footerLinks.map((link: any) => (
-                        <a key={link.id} href={link.url} className="hover:opacity-100 hover:underline">
-                            {link.label}
-                        </a>
-                    ))}
+            <footer className="mt-24 border-t border-[var(--theme-text)]/10 py-12 text-sm opacity-60">
+                <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+
+                    {/* Left: Copyright */}
+                    <div className="text-center md:text-left order-3 md:order-1">
+                        <p>&copy; {new Date().getFullYear()} {siteData.name}. Powered by LiteMark.</p>
+                    </div>
+
+                    {/* Center: Links */}
+                    <div className="flex justify-center space-x-4 order-2 md:order-2">
+                        {footerLinks.map((link: any) => (
+                            <a key={link.id} href={link.url} className="hover:opacity-100 hover:underline">
+                                {link.label}
+                            </a>
+                        ))}
+                    </div>
+
+                    {/* Right: Social */}
+                    <div className="flex justify-center md:justify-end gap-6 order-1 md:order-3">
+                        {footerSocial.length > 0 && footerSocial.map((link: any) => (
+                            <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="opacity-80 hover:opacity-100 transition-opacity">
+                                <span className="sr-only">{link.platform}</span>
+                                <SiteSocialIcon platform={link.platform} />
+                            </a>
+                        ))}
+                    </div>
                 </div>
-                <p>&copy; {new Date().getFullYear()} {siteData.name}. Powered by LiteMark.</p>
             </footer>
         </div>
     );
 }
+
+

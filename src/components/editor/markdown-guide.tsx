@@ -21,23 +21,30 @@ Inside sections, use \`:::column\` to wrap content.
 ### Components
 - **Cards**: \`:::card\` wraps content in a styled card.
 - **Buttons**: \`::button[Label]{href="#" variant="primary|secondary"}\`
+- **Forms**: \`::form{id="FORM_ID"}\`
+- **Blog Posts**: \`::blog-posts{count="3"}\`
+- **Spacers**: \`::breakline{height="4rem"}\`
 - **Icons**: \`::icon{name="IconName"}\` (Lucide icon names)
 
 ### Styling
 - **Backgrounds**: Add \`bg="primary|secondary|muted"\` to sections/cards.
 - **Alignment**: Add \`align="center|right|justify"\` to sections/columns.
+- **Anchors**: Add \`id="section-id"\` to sections for navigation.
 - **Text Color**: \`:text[Highlighed]{color="primary"}\`
+- **Breaks**: \`::br\` or \`::breakline{height="..."}\`
 
 ### Example
-::::section{layout="50-50" bg="muted"}
+::::section{layout="50-50" bg="muted" id="hero"}
   :::column
     # Hero Title
     ::button[Get Started]{href="/signup"}
   :::
   :::column{align="center"}
-    ::icon{name="Rocket" className="w-12 h-12 text-primary"}
+    ::icon{name="Rocket"}
   :::
 ::::
+::breakline{height="2rem"}
+::blog-posts{count="3"}
 `;
         navigator.clipboard.writeText(guideText);
         alert("Prompt copied to clipboard!");
@@ -114,6 +121,18 @@ menu:
                 </section>
 
                 <section>
+                    <h4 className="font-semibold mb-2 text-black">Anchors & Navigation</h4>
+                    <p className="mb-2">Add IDs to sections to create scroll targets (anchors).</p>
+                    <div className="bg-gray-100 p-2 rounded font-mono text-xs whitespace-pre overflow-x-auto border">
+                        {`::::section{id="features"}
+  ...
+::::
+
+[Link to Features](#features)`}
+                    </div>
+                </section>
+
+                <section>
                     <h4 className="font-semibold mb-2 text-black">Icons</h4>
                     <p className="mb-2">Insert Lucide icons. Note: Icons are now styled as floating feature icons (absolute positioned).</p>
                     <div className="bg-gray-100 p-2 rounded font-mono text-xs whitespace-pre overflow-x-auto border">
@@ -135,7 +154,7 @@ menu:
                                 {`:::card
 ### Card Title
 Card content goes here.
-:::`}
+::: `}
                             </div>
                         </div>
 
@@ -143,7 +162,29 @@ Card content goes here.
                             <p className="mb-1 font-medium text-xs">Button</p>
                             <div className="bg-gray-100 p-2 rounded font-mono text-xs whitespace-pre overflow-x-auto border">
                                 {`::button[Primary]{href = "/contact"}
-                                ::button[Secondary]{href = "/about" variant="secondary"}`}
+::button[Secondary]{href = "/about" variant="secondary"}`}
+                            </div>
+                        </div>
+
+                        <div>
+                            <p className="mb-1 font-medium text-xs">Forms</p>
+                            <div className="bg-gray-100 p-2 rounded font-mono text-xs whitespace-pre overflow-x-auto border">
+                                {`::form{id="your-form-id"}`}
+                            </div>
+                        </div>
+
+                        <div>
+                            <p className="mb-1 font-medium text-xs">Blog Posts</p>
+                            <div className="bg-gray-100 p-2 rounded font-mono text-xs whitespace-pre overflow-x-auto border">
+                                {`::blog-posts{count="3"}`}
+                            </div>
+                        </div>
+
+                        <div>
+                            <p className="mb-1 font-medium text-xs">Spacers & Breaks</p>
+                            <div className="bg-gray-100 p-2 rounded font-mono text-xs whitespace-pre overflow-x-auto border">
+                                {`::breakline{height="4rem"}
+::br`}
                             </div>
                         </div>
 

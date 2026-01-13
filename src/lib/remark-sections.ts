@@ -88,10 +88,13 @@ export function remarkSections() {
                     // Full Width Logic for Top-Level Sections
                     const isTopLevel = parent.type === 'root';
 
+                    // Extract logic-only attributes to avoid passing them to the DOM
+                    const { layout: _l, align: _a, bg: _b, ...domAttributes } = attributes;
+
                     data.hName = 'div';
                     data.hProperties = {
                         className: `w-full ${isTopLevel ? 'py-24 px-6 ' : 'pt-10'}  ${gridClass} ${alignClass}`.trim(),
-                        ...attributes
+                        ...domAttributes
                     };
 
                     if (bg) {

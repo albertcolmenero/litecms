@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { createMenu, deleteMenu, upsertMenuItem, deleteMenuItem, createMenuCta, deleteMenuCta } from "@/app/actions";
-import { Plus, Trash2, Link as LinkIcon, FileText, Save } from "lucide-react";
+import { createMenu, deleteMenu, upsertMenuItem, deleteMenuItem, createMenuCta, deleteMenuCta, createSocialLink, deleteSocialLink, updateMenuItemOrder } from "@/app/actions";
+import { Plus, Trash2, Link as LinkIcon, FileText, Save, X, Linkedin, Facebook, Instagram, Youtube, Github, ChevronUp, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
+import React from "react";
 
 // Define Types locally if not available easily from Prisma
 type Page = { id: string; title: string; slug: string };
 type MenuItem = { id: string; label: string; url: string | null; pageId: string | null; order: number; anchor?: string | null; page?: Page | null };
 type MenuCta = { id: string; label: string; url: string; style: string; };
-type Menu = { id: string; name: string; items: MenuItem[]; ctas?: MenuCta[] };
+type SocialLink = { id: string; platform: string; url: string; };
+type Menu = { id: string; name: string; items: MenuItem[]; ctas?: MenuCta[]; socialLinks?: SocialLink[] };
 
 export default function MenuManager({ initialMenus, siteId, pages }: { initialMenus: Menu[]; siteId: string; pages: Page[] }) {
     const [menus, setMenus] = useState<Menu[]>(initialMenus);
@@ -25,7 +27,7 @@ export default function MenuManager({ initialMenus, siteId, pages }: { initialMe
         if (!newMenuName) return;
         const newMenu = await createMenu(siteId, newMenuName);
         if (newMenu) {
-            setMenus([...menus, { ...newMenu, items: [] }]);
+            setMenus([...menus, { ...newMenu, items: [], socialLinks: [] }]);
             setSelectedMenuId(newMenu.id);
             setNewMenuName("");
             setIsCreating(false);
@@ -43,6 +45,36 @@ export default function MenuManager({ initialMenus, siteId, pages }: { initialMe
     };
 
     // Item Actions
+    const handleReorder = async (itemId: string, direction: 'up' | 'down') => {
+        if (!selectedMenu) return;
+
+        const currentItems = [...selectedMenu.items].sort((a, b) => a.order - b.order);
+        const index = currentItems.findIndex(i => i.id === itemId);
+        if (index === -1) return;
+
+        if (direction === 'up' && index > 0) {
+            // Swap with previous
+            [currentItems[index], currentItems[index - 1]] = [currentItems[index - 1], currentItems[index]];
+        } else if (direction === 'down' && index < currentItems.length - 1) {
+            // Swap with next
+            [currentItems[index], currentItems[index + 1]] = [currentItems[index + 1], currentItems[index]];
+        } else {
+            return;
+        }
+
+        // Reassign orders based on new index
+        const updatedItems = currentItems.map((item, idx) => ({ ...item, order: idx + 1 }));
+
+        // Optimistic Update
+        setMenus(prev => prev.map(m =>
+            m.id === selectedMenuId ? { ...m, items: updatedItems } : m
+        ));
+
+        // Sync with server
+        await updateMenuItemOrder(updatedItems.map(i => ({ id: i.id, order: i.order })));
+        router.refresh();
+    };
+
     const handleDeleteItem = async (itemId: string) => {
         await deleteMenuItem(itemId);
         router.refresh(); // Simple refresh to sync state
@@ -57,6 +89,41 @@ export default function MenuManager({ initialMenus, siteId, pages }: { initialMe
 
     const handleDeleteCta = async (ctaId: string) => {
         await deleteMenuCta(ctaId);
+        router.refresh();
+    };
+
+    // Social Link Actions
+    const handleAddSocialLink = async (platform: string, url: string) => {
+        if (!selectedMenuId) return;
+
+        // Optimistic update
+        const tempId = Math.random().toString(36).substr(2, 9);
+        const newLink: SocialLink = { id: tempId, platform, url };
+
+        setMenus(prev => prev.map(m =>
+            m.id === selectedMenuId
+                ? { ...m, socialLinks: [...(m.socialLinks || []), newLink] }
+                : m
+        ));
+
+        const created = await createSocialLink(selectedMenuId, { platform, url });
+
+        // Update with real ID
+        if (created) {
+            setMenus(prev => prev.map(m =>
+                m.id === selectedMenuId
+                    ? {
+                        ...m,
+                        socialLinks: (m.socialLinks || []).map(l => l.id === tempId ? created : l)
+                    }
+                    : m
+            ));
+        }
+        router.refresh();
+    };
+
+    const handleDeleteSocialLink = async (linkId: string) => {
+        await deleteSocialLink(linkId);
         router.refresh();
     };
 
@@ -120,27 +187,48 @@ export default function MenuManager({ initialMenus, siteId, pages }: { initialMe
                             {selectedMenu.items.length === 0 ? (
                                 <p className="text-gray-400 italic">No items in this menu.</p>
                             ) : (
-                                selectedMenu.items.map((item, idx) => (
-                                    <div key={item.id} className="flex items-center justify-between p-3 border rounded bg-gray-50">
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-gray-400 text-xs w-4">{idx + 1}</span>
-                                            <div>
-                                                <p className="font-medium text-sm">{item.label}</p>
-                                                <p className="text-xs text-gray-500 flex items-center gap-1">
-                                                    {item.page ? (
-                                                        <><FileText size={10} /> Page: {item.page.title}</>
-                                                    ) : (
-                                                        <><LinkIcon size={10} /> URL: {item.url}</>
-                                                    )}
-                                                    {item.anchor && <span className="ml-2 text-gray-400">#{item.anchor.replace('#', '')}</span>}
-                                                </p>
+                                selectedMenu.items
+                                    .slice()
+                                    .sort((a, b) => a.order - b.order)
+                                    .map((item, idx, arr) => (
+                                        <div key={item.id} className="flex items-center justify-between p-3 border rounded bg-gray-50">
+                                            <div className="flex items-center gap-3">
+                                                {/* Reorder Buttons */}
+                                                <div className="flex flex-col gap-0.5">
+                                                    <button
+                                                        disabled={idx === 0}
+                                                        onClick={() => handleReorder(item.id, 'up')}
+                                                        className={`p-0.5 hover:bg-gray-200 rounded ${idx === 0 ? 'text-gray-300' : 'text-gray-600'}`}
+                                                    >
+                                                        <ChevronUp size={12} />
+                                                    </button>
+                                                    <button
+                                                        disabled={idx === arr.length - 1}
+                                                        onClick={() => handleReorder(item.id, 'down')}
+                                                        className={`p-0.5 hover:bg-gray-200 rounded ${idx === arr.length - 1 ? 'text-gray-300' : 'text-gray-600'}`}
+                                                    >
+                                                        <ChevronDown size={12} />
+                                                    </button>
+                                                </div>
+
+                                                <span className="text-gray-400 text-xs w-4 ml-1">{idx + 1}</span>
+                                                <div>
+                                                    <p className="font-medium text-sm">{item.label}</p>
+                                                    <p className="text-xs text-gray-500 flex items-center gap-1">
+                                                        {item.page ? (
+                                                            <><FileText size={10} /> Page: {item.page.title}</>
+                                                        ) : (
+                                                            <><LinkIcon size={10} /> URL: {item.url}</>
+                                                        )}
+                                                        {item.anchor && <span className="ml-2 text-gray-400">#{item.anchor.replace('#', '')}</span>}
+                                                    </p>
+                                                </div>
                                             </div>
+                                            <button onClick={() => handleDeleteItem(item.id)} className="text-gray-400 hover:text-red-500">
+                                                <Trash2 size={14} />
+                                            </button>
                                         </div>
-                                        <button onClick={() => handleDeleteItem(item.id)} className="text-gray-400 hover:text-red-500">
-                                            <Trash2 size={14} />
-                                        </button>
-                                    </div>
-                                ))
+                                    ))
                             )}
                         </div>
 
@@ -148,6 +236,8 @@ export default function MenuManager({ initialMenus, siteId, pages }: { initialMe
                         <div className="border-t pt-6">
                             <h3 className="font-semibold mb-4">Add Menu Item</h3>
                             <AddItemForm pages={pages} onAdd={async (label, type, value, anchor) => {
+                                if (!selectedMenuId) return;
+
                                 const data: any = {
                                     label,
                                     anchor,
@@ -157,7 +247,36 @@ export default function MenuManager({ initialMenus, siteId, pages }: { initialMe
                                 if (type === "page") data.pageId = value;
                                 else data.url = value;
 
-                                await upsertMenuItem(selectedMenuId!, null, data);
+                                // Optimistic Update
+                                const tempId = Math.random().toString(36).substr(2, 9);
+                                const optimisticItem: MenuItem = {
+                                    id: tempId,
+                                    label,
+                                    order: data.order,
+                                    url: data.url || null,
+                                    pageId: data.pageId || null,
+                                    anchor: anchor || null,
+                                    page: type === 'page' ? pages.find(p => p.id === value) : undefined
+                                };
+
+                                setMenus(prev => prev.map(m =>
+                                    m.id === selectedMenuId
+                                        ? { ...m, items: [...m.items, optimisticItem] }
+                                        : m
+                                ));
+
+                                const created = await upsertMenuItem(selectedMenuId, null, data);
+
+                                if (created) {
+                                    setMenus(prev => prev.map(m =>
+                                        m.id === selectedMenuId
+                                            ? {
+                                                ...m,
+                                                items: m.items.map(i => i.id === tempId ? { ...created, page: optimisticItem.page } : i)
+                                            }
+                                            : m
+                                    ));
+                                }
                                 router.refresh();
                             }} />
                         </div>
@@ -191,6 +310,35 @@ export default function MenuManager({ initialMenus, siteId, pages }: { initialMe
                                 <AddCtaForm onAdd={handleAddCta} />
                             </div>
                         )}
+
+                        {/* Social Links (For Footer) */}
+                        <div className="border-t pt-6 mt-8">
+                            <h3 className="font-semibold mb-4">Social Links</h3>
+                            <div className="space-y-2 mb-4">
+                                {selectedMenu.socialLinks && selectedMenu.socialLinks.length > 0 ? (
+                                    selectedMenu.socialLinks.map(link => (
+                                        <div key={link.id} className="flex items-center justify-between p-3 border rounded bg-gray-50">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-1 bg-gray-100 rounded">
+                                                    {getSocialIcon(link.platform)}
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-sm capitalize">{link.platform === 'x' ? 'X.com' : link.platform}</p>
+                                                    <p className="text-xs text-gray-500">{link.url}</p>
+                                                </div>
+                                            </div>
+                                            <button onClick={() => handleDeleteSocialLink(link.id)} className="text-gray-400 hover:text-red-500">
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-gray-400 italic text-sm">No social links.</p>
+                                )}
+                            </div>
+                            <AddSocialLinkForm onAdd={handleAddSocialLink} />
+                        </div>
+
                     </div>
                 ) : (
                     <div className="h-full flex items-center justify-center text-gray-400">
@@ -200,6 +348,19 @@ export default function MenuManager({ initialMenus, siteId, pages }: { initialMe
             </div>
         </div>
     );
+}
+
+function getSocialIcon(platform: string) {
+    switch (platform.toLowerCase()) {
+        case 'twitter':
+        case 'x': return <X size={14} />;
+        case 'linkedin': return <Linkedin size={14} />;
+        case 'facebook': return <Facebook size={14} />;
+        case 'instagram': return <Instagram size={14} />;
+        case 'youtube': return <Youtube size={14} />;
+        case 'github': return <Github size={14} />;
+        default: return <LinkIcon size={14} />;
+    }
 }
 
 function AddItemForm({ pages, onAdd }: { pages: Page[], onAdd: (label: string, type: string, value: string, anchor?: string) => Promise<void> }) {
@@ -340,3 +501,39 @@ function AddCtaForm({ onAdd }: { onAdd: (label: string, url: string, style: stri
         </form>
     )
 }
+
+function AddSocialLinkForm({ onAdd }: { onAdd: (platform: string, url: string) => Promise<void> }) {
+    const [platform, setPlatform] = useState("x");
+    const [url, setUrl] = useState("");
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await onAdd(platform, url);
+        setUrl("");
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end bg-gray-50 p-4 rounded border">
+            <div className="md:col-span-1">
+                <label className="block text-xs font-medium text-gray-500 mb-1">Platform</label>
+                <select className="w-full p-2 border rounded text-sm" value={platform} onChange={e => setPlatform(e.target.value)}>
+                    <option value="x">X.com</option>
+                    <option value="linkedin">LinkedIn</option>
+                    <option value="facebook">Facebook</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="github">GitHub</option>
+                </select>
+            </div>
+            <div className="md:col-span-2">
+                <label className="block text-xs font-medium text-gray-500 mb-1">URL</label>
+                <input required className="w-full p-2 border rounded text-sm" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://..." />
+            </div>
+            <div className="md:col-span-1">
+                <button type="submit" className="w-full bg-black text-white p-2 rounded text-sm hover:opacity-80">Add Link</button>
+            </div>
+        </form>
+    )
+}
+
+
