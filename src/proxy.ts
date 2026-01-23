@@ -40,7 +40,9 @@ export default clerkMiddleware(async (auth, req) => {
   if (
     hostname !== "localhost" &&
     hostname !== "app.localhost" &&
-    hostname !== process.env.NEXT_PUBLIC_ROOT_DOMAIN
+    hostname !== process.env.NEXT_PUBLIC_ROOT_DOMAIN &&
+    hostname !== "litecms-six.vercel.app" &&
+    hostname !== process.env.VERCEL_URL
   ) {
     // Determine if it's an API route (which should bypass subdomain rewrite)
     if (url.pathname.startsWith('/api')) {
