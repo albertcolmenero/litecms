@@ -19,7 +19,7 @@ export default clerkMiddleware(async (auth, req) => {
     }`;
 
   // 1. App / Dashboard Routing (app.localhost or app.domain.com)
-  if (hostname === "app.localhost" || hostname === process.env.NEXT_PUBLIC_ROOT_DOMAIN) {
+  if (hostname === "app.localhost") {
     // Avoid double-rewriting if path already starts with /app
     if (url.pathname.startsWith('/app')) {
       console.log(`[Proxy] Skipping rewrite for /app path: ${url.pathname} (${Date.now() - start}ms)`);
