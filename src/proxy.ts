@@ -66,6 +66,11 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.rewrite(new URL("/app", req.url));
   }
 
+  // [NEW] Rewrite /site/... to /app/site/... for dashboard site links
+  if (url.pathname.startsWith("/site/")) {
+    return NextResponse.rewrite(new URL(url.pathname.replace("/site", "/app/site"), req.url));
+  }
+
   return NextResponse.next();
 });
 
