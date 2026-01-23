@@ -42,6 +42,8 @@ export default clerkMiddleware(async (auth, req) => {
     hostname !== "app.localhost" &&
     hostname !== process.env.NEXT_PUBLIC_ROOT_DOMAIN &&
     hostname !== "litecms-six.vercel.app" &&
+    hostname !== "lite-cms.com" &&
+    hostname !== "www.lite-cms.com" &&
     hostname !== process.env.VERCEL_URL
   ) {
     // Determine if it's an API route (which should bypass subdomain rewrite)
@@ -58,6 +60,12 @@ export default clerkMiddleware(async (auth, req) => {
 
   // 3. Main Domain
   console.log(`[Proxy] Pass through (${Date.now() - start}ms)`);
+
+  // [NEW] Convenience rewrites for Vercel/Root domain usage
+  if (url.pathname === "/dashboard" || url.pathname === "/admin") {
+    return NextResponse.rewrite(new URL("/app", req.url));
+  }
+
   return NextResponse.next();
 });
 
