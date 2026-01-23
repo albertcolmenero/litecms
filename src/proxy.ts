@@ -26,6 +26,12 @@ export default clerkMiddleware(async (auth, req) => {
       return NextResponse.next();
     }
 
+    // Exclude public auth routes from rewrite
+    if (url.pathname.startsWith("/sign-in") || url.pathname.startsWith("/sign-up")) {
+      console.log(`[Proxy] Skipping rewrite for auth path: ${url.pathname}`);
+      return NextResponse.next();
+    }
+
     console.log(`[Proxy] Rewriting to /app${path === "/" ? "" : path} (${Date.now() - start}ms)`);
     return NextResponse.rewrite(new URL(`/app${path === "/" ? "" : path}`, req.url));
   }
