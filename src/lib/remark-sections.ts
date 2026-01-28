@@ -36,12 +36,12 @@ export function remarkSections() {
                     }
                 };
 
-                const alignClass = align ? getAlignmentClass(align) : '';
+                const alignClass = getAlignmentClass(align);
 
                 if (node.name === 'section') {
                     const layout = attributes.layout || '100';
 
-                    let gridClass = 'grid gap-4';
+                    let gridClass = 'grid gap-12 w-full';
                     // Define layouts
 
                     const parts = layout.split('-');
@@ -49,82 +49,55 @@ export function remarkSections() {
                     const isValidCount = parts.length > 0 && parts.length <= 4;
 
                     if (isValidCount && isAllNumbers) {
-                        // Mobile: Stack (grid-cols-1)
-                        gridClass += ' grid-cols-' + parts.length;
-
                         // Check if all parts are equal numbers (e.g., 50-50, 33-33-33)
                         const isEqual = parts.every((p: string) => p === parts[0]);
 
                         if (isEqual) {
-                            gridClass += ` sm:grid-cols-${parts.length}`;
+                            gridClass += ` md:grid-cols-${parts.length}`;
                         } else {
-                            gridClass += ' sm:dynamic-grid';
-                            gridClass += ' sm:grid-cols-[' + parts.map((p: string) => `${p}%`).join('_') + ']';
+                            gridClass += ' md:grid-cols-[' + parts.map((p: string) => `${p}%`).join('_') + ']';
                             // Desktop variable for potential JS usage or custom CSS
                             const template = parts.map((p: string) => `${p}%`).join(' ');
                             addStyle(`--desktop-layout: ${template}`);
                         }
                     } else {
                         // Fallback
-                        gridClass += ' sm:grid-cols-1';
+                        gridClass += ' md:grid-cols-1';
                     }
-
-                    /*
-                    if (layout === '50-50') gridClass += ' grid-cols-2 md:grid-cols-2';
-                    else if (layout === '10-90') gridClass += ' grid-cols-2 md:grid-cols-[10%_90%]';    
-                    else if (layout === '90-10') gridClass += ' grid-cols-2 md:grid-cols-[90%_10%]';
-                    else if (layout === '20-80') gridClass += ' grid-cols-2 md:grid-cols-[20%_80%]';
-                    else if (layout === '80-20') gridClass += ' grid-cols-2 md:grid-cols-[80%_20%]';
-                    else if (layout === '30-70') gridClass += ' grid-cols-2 md:grid-cols-[30%_70%]';
-                    else if (layout === '70-30') gridClass += ' grid-cols-2 md:grid-cols-[70%_30%]';
-                    else if (layout === '60-40') gridClass += ' grid-cols-2 sm:grid-cols-[60%_40%]';
-                    else if (layout === '40-60') gridClass += ' grid-cols-2 sm:grid-cols-[40%_60%]';
-                    else if (layout === '33-33-33') gridClass += ' grid-cols-3 sm:grid-cols-3';
-                    else if (layout === '20-60-20') gridClass += ' grid-cols-3 sm:grid-cols-[20%_60%_20%]';
-                    else if (layout === '45-10-45 gridClass += ' grid-cols-3 sm:grid-cols-[45%_10%_45%]';
-                    else gridClass += ' grid-cols-1';
-*/
-
-                    // Full Width Logic for Top-Level Sections
-                    const isTopLevel = parent.type === 'root';
 
                     // Extract logic-only attributes to avoid passing them to the DOM
                     const { layout: _l, align: _a, bg: _b, ...domAttributes } = attributes;
 
-                    data.hName = 'div';
+                    const isTopLevel = parent && parent.type === 'root';
+
+                    data.hName = isTopLevel ? 'section' : 'div';
                     data.hProperties = {
-                        className: `w-full ${isTopLevel ? 'py-24 px-6 ' : 'pt-10'}  ${gridClass} ${alignClass}`.trim(),
+                        className: isTopLevel ? 'py-20 md:py-32 px-6' : 'py-4 md:py-8',
                         ...domAttributes
                     };
 
-                    if (bg) {
-                        addStyle(`background-color: var(--color-${bg}); padding: 6rem 0;`); // Add vertical padding to bg sections
 
-                        if (isTopLevel) {
-                            // Breakout strategy
-                            addStyle(`
-                                width: var(--breakout-width, 100vw);
-                                margin-left: calc(50% - var(--breakout-offset, 50vw));
-                                margin-right: calc(50% - var(--breakout-offset, 50vw));
-                                padding-left: calc(var(--breakout-offset, 50vw) - 50%);
-                                padding-right: calc(var(--breakout-offset, 50vw) - 50%);
-                             `);
-                            // Note: content inside still follows grid, but background spans full
-                            // To make content constrained, we actually need the grid to be the inner container.
-                            // Current implementation puts grid on the wrapper. 
-                            // To fix validity of breakout with centered content, we'd ideally wrapping children.
-                            // But for now, we'll apply breakout to the grid itself. The grid will span 100vw.
-                            // If we want content centered max-width, we might need a `max-width` on children or `padding-inline`.
-                            // Let's rely on standard padding for now.
-                            data.hProperties.className = data.hProperties.className.replace('w-full', ''); // Removing w-full conflict
-                        }
+                    if (bg) {
+                        addStyle(`background-color: var(--color-${bg})`);
                     }
+
+                    const originalChildren = node.children || [];
+                    node.children = [{
+                        type: 'containerDirective',
+                        data: {
+                            hName: 'div',
+                            hProperties: {
+                                className: isTopLevel ? `max-w-6xl mx-auto ${gridClass} ${alignClass}`.trim() : `${gridClass} ${alignClass}`.trim()
+                            }
+                        },
+                        children: originalChildren
+                    }];
                 }
 
                 if (node.name === 'column') {
                     data.hName = 'div';
                     data.hProperties = {
-                        className: `w-full ${alignClass}`.trim(),
+                        className: `${alignClass}`.trim(),
                         ...attributes
                     };
                     if (bg) addStyle(`background-color: var(--color-${bg}); padding: 1rem; border-radius: 0.5rem;`);
@@ -149,7 +122,7 @@ export function remarkSections() {
 
                     data.hName = 'a';
                     data.hProperties = {
-                        className: 'inline-flex items-center justify-center h-12 mx-4 px-8 rounded-lg text-base font-medium hover:opacity-90 transition-opacity no-underline',
+                        className: 'inline-flex items-center justify-center h-12 px-8 rounded-lg text-base font-medium hover:opacity-90 transition-opacity no-underline',
                         href: attributes.href || '#',
                         ...attributes
                     };
@@ -251,3 +224,11 @@ export function remarkSections() {
         });
     };
 }
+
+/*
+works:
+max-w-5xl mx-auto grid md:grid-cols-[1fr_2fr] gap-12
+
+not working:
+max-w-6xl mx-auto grid gap-12 md:grid-cols-[60%_40%] text-left
+*/

@@ -152,7 +152,7 @@ export default async function PublicSitePage({ params }: { params: Promise<{ sit
     return (
         <div style={styleVariables} className="min-h-screen bg-[var(--theme-background)] text-[var(--theme-text)] transition-colors duration-200">
             <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="max-w-6xl mx-auto">
                     <div className="relative flex justify-between items-center h-16">
                         <a href="/" className="font-bold text-xl hover:opacity-80">{siteData.name}</a>
                         <nav className="hidden md:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 space-x-8">
@@ -180,44 +180,46 @@ export default async function PublicSitePage({ params }: { params: Promise<{ sit
                 </div>
             </header>
 
-            <main className="max-w-screen-xl mx-auto  max-w-none mt-16 ">
+            <main className="pt-16 ">
                 {pageData.type === 'blog-post' ? (
-                    <article className="mx-auto max-w-screen-xl px-6 lg:px-8 pt-20 pb-16">
+                    <section className="py-20 md:py-32 px-6">
+                        <article className="max-w-5xl mx-auto">
 
-                        <div className="space-y-4 text-center mb-10">
-                            <div className="flex items-center justify-center gap-x-4 text-xs font-medium">
-                                <time dateTime={pageData.publishedAt ? new Date(pageData.publishedAt).toISOString() : ""} className="text-gray-500 dark:text-gray-400">
-                                    {pageData.publishedAt ? new Date(pageData.publishedAt).toLocaleDateString(undefined, {
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric'
-                                    }) : "Draft"}
-                                </time>
+                            <div className="space-y-4 text-center mb-10">
+                                <div className="flex items-center justify-center gap-x-4 text-xs font-medium">
+                                    <time dateTime={pageData.publishedAt ? new Date(pageData.publishedAt).toISOString() : ""} className="text-gray-500 dark:text-gray-400">
+                                        {pageData.publishedAt ? new Date(pageData.publishedAt).toLocaleDateString(undefined, {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        }) : "Draft"}
+                                    </time>
+                                </div>
+                                <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
+                                    {pageData.title}
+                                </h1>
+                                <div className="flex items-center justify-center space-x-2 pt-2">
+                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                        {pageData.author || "Admin"}
+                                    </p>
+                                </div>
                             </div>
-                            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">
-                                {pageData.title}
-                            </h1>
-                            <div className="flex items-center justify-center space-x-2 pt-2">
-                                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                    {pageData.author || "Admin"}
-                                </p>
-                            </div>
-                        </div>
 
-                        {pageData.image && (
-                            <div className="relative aspect-video w-full rounded-2xl overflow-hidden mb-12 bg-gray-100 dark:bg-gray-800 border dark:border-gray-800 shadow-sm">
-                                <img
-                                    src={pageData.image}
-                                    alt={pageData.title}
-                                    className="absolute inset-0 h-full w-full object-cover"
-                                />
-                            </div>
-                        )}
+                            {pageData.image && (
+                                <div className="relative aspect-video w-full rounded-2xl overflow-hidden mb-12 bg-gray-100 dark:bg-gray-800 border dark:border-gray-800 shadow-sm">
+                                    <img
+                                        src={pageData.image}
+                                        alt={pageData.title}
+                                        className="absolute inset-0 h-full w-full object-cover"
+                                    />
+                                </div>
+                            )}
 
-                        <div className="space-y-4  mb-10">
-                            <MarkdownRenderer content={pageData.content} site={siteData} />
-                        </div>
-                    </article>
+                            <div className="space-y-4  mb-10">
+                                <MarkdownRenderer content={pageData.content} site={siteData} />
+                            </div>
+                        </article>
+                    </section>
                 ) : (
                     <MarkdownRenderer content={pageData.content} site={siteData} />
                 )}

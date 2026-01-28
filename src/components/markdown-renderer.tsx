@@ -83,6 +83,33 @@ export function MarkdownRenderer({ content, className, site }: MarkdownRendererP
 
     return (
         <div className={className} style={styleVariables}>
+            <ReactMarkdown
+                remarkPlugins={[remarkGfm, remarkDirective, remarkSections]}
+                rehypePlugins={[rehypeRaw]}
+                components={{
+                    // Styles for directives are handled by remarkSections transforming directly to div with classes
+                    h1: ({ node, ...props }: any) => <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight mb-6" {...props} />,
+                    h2: ({ node, ...props }: any) => <h2 className="mb-2 text-base font-semibold leading-7 text-blue-600 dark:text-blue-500" {...props} />,
+                    h3: ({ node, ...props }: any) => <h3 className="mb-3 text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl" {...props} />,
+                    p: ({ node, ...props }: any) => <p className="text-base leading-8 text-gray-600 dark:text-gray-300 " {...props} />,
+                    a: ({ node, ...props }: any) => <a className="font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500" {...props} />,
+                    img: ({ node, ...props }: any) => <img className="rounded-xl shadow-lg w-full h-auto" {...props} />,
+                    "icon-component": IconComponent,
+                    "form-component": Form,
+                    "blog-posts-component": (props: any) => <BlogPosts {...props} siteId={site?.id} />,
+                } as any}
+            >
+                {markdownBody}
+            </ReactMarkdown>
+        </div>
+    );
+
+}
+
+/*
+
+return (
+        <div className={className} style={styleVariables}>
             <style jsx global>{`
                 .markdown-content {
                     font-family: ${fontFamily === "Geist"
@@ -114,4 +141,4 @@ export function MarkdownRenderer({ content, className, site }: MarkdownRendererP
             </div>
         </div>
     );
-}
+*/

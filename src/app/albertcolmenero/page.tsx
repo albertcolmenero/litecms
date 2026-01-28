@@ -59,7 +59,7 @@ export default function PersonalPage() {
 
                 {/* About Section */}
                 <section id="about" className="py-20 px-6 bg-white dark:bg-zinc-900/50 border-y border-gray-100 dark:border-zinc-800">
-                    <div className="max-w-5xl mx-auto grid md:grid-cols-[1fr_2fr] gap-12">
+                    <div className="max-w-5xl mx-auto grid md:grid-cols-[30%_70%] gap-12">
                         <div>
                             <h2 className="text-sm font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-2">About Me</h2>
                             <div className="w-12 h-1 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
