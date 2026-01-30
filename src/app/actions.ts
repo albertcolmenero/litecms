@@ -186,10 +186,16 @@ export async function getSiteByDomain(domain: string) {
         ? domain.replace(`.${rootDomain}`, "")
         : null;
 
+    // Normalize domain: strip www. prefix to match both variants
+    const normalizedDomain = domain.replace(/^www\./, "");
+    const wwwDomain = `www.${normalizedDomain}`;
+
     return prisma.site.findFirst({
         where: {
             OR: [
-                { customDomain: domain },
+                { customDomain: domain },           // exact match
+                { customDomain: normalizedDomain }, // without www
+                { customDomain: wwwDomain },        // with www
                 { subdomain: subdomain || domain },
             ],
         },
