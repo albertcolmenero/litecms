@@ -210,7 +210,13 @@ export async function getSiteByDomain(domain: string) {
     });
 }
 
-export async function updateSite(siteId: string, data: { homePageId?: string; name?: string; description?: string; settings?: any }) {
+export async function updateSite(siteId: string, data: {
+    homePageId?: string;
+    name?: string;
+    description?: string;
+    settings?: any;
+    customDomain?: string | null;
+}) {
     const user = await currentUser();
     if (!user) return { error: "Unauthorized" };
 
@@ -223,17 +229,47 @@ export async function updateSite(siteId: string, data: { homePageId?: string; na
         return { error: "Unauthorized" };
     }
 
+    // Prepare update data
+    const updateData: any = { ...data };
+
+    // Validate and normalize custom domain if provided
+    if (data.customDomain !== undefined) {
+        if (data.customDomain === null || data.customDomain === "") {
+            updateData.customDomain = null;
+        } else {
+            let domain = data.customDomain.trim().toLowerCase();
+            // Remove protocol if provided
+            domain = domain.replace(/^https?:\/\//, "");
+            // Remove www. prefix
+            domain = domain.replace(/^www\./, "");
+            // Remove trailing slashes
+            domain = domain.replace(/\/+$/, "");
+
+            // Validate domain format (basic check)
+            const domainRegex = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/;
+            if (!domainRegex.test(domain)) {
+                return { error: "Invalid domain format. Please enter a valid domain like 'example.com'" };
+            }
+
+            updateData.customDomain = domain;
+        }
+    }
+
     try {
         await prisma.site.update({
             where: { id: siteId },
-            data: { ...data },
+            data: updateData,
         });
         revalidatePath(`/app/site/${siteId}`);
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
+        if (error.code === "P2002") {
+            return { error: "This domain is already in use by another site" };
+        }
         return { error: "Failed to update site" };
     }
 }
+
 
 export async function getPageBySiteAndSlug(siteId: string, slug: string) {
     return prisma.page.findUnique({

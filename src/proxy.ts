@@ -37,6 +37,11 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   // 2. Subdomain Routing (e.g. foo.localhost) -> Public Sites
+  // This also handles CUSTOM DOMAINS (e.g., customdomain.com).
+  // Any hostname not matching system domains gets rewritten to /sites/[hostname].
+  // The page at /sites/[hostname] calls getSiteByDomain() which queries:
+  //   - customDomain field (for external domains like albertcolmenero.com)
+  //   - subdomain field (for subdomain.lite-cms.com)
   if (
     hostname !== "localhost" &&
     hostname !== "app.localhost" &&

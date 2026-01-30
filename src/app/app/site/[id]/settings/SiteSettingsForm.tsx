@@ -3,7 +3,7 @@
 import { updateSite } from "@/app/actions";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { Save, Plus, Trash } from "lucide-react";
+import { Save, Plus, Trash, ExternalLink, Globe, Info } from "lucide-react";
 
 const FONT_OPTIONS = [
     "Geist",
@@ -45,11 +45,14 @@ export default function SiteSettingsForm({ site }: SiteSettingsFormProps) {
         const name = formData.get("name") as string;
         const description = formData.get("description") as string;
         const homePageId = formData.get("homePageId") as string;
+        const customDomain = formData.get("customDomain") as string;
 
         const data: any = {};
         if (name) data.name = name;
         if (description) data.description = description;
         if (homePageId) data.homePageId = homePageId === "__default__" ? null : homePageId;
+        // Handle custom domain - allow clearing by setting to null
+        data.customDomain = customDomain?.trim() || null;
 
         // Handle Theme Settings
         const themePrimary = formData.get("theme_primary") as string;
@@ -153,6 +156,70 @@ export default function SiteSettingsForm({ site }: SiteSettingsFormProps) {
                         </option>
                     ))}
                 </select>
+            </div>
+
+            <hr className="my-8" />
+
+            {/* Domains Section */}
+            <div>
+                <h2 className="text-xl font-bold mb-4">Domains</h2>
+
+                {/* Subdomain (read-only) */}
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Subdomain</label>
+                    <div className="flex items-center gap-2">
+                        <div className="flex-1 p-2 bg-gray-50 border rounded text-gray-600 font-mono text-sm">
+                            {site.subdomain}.lite-cms.com
+                        </div>
+                        <a
+                            href={`https://${site.subdomain}.lite-cms.com`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 text-gray-500 hover:text-black transition-colors"
+                            title="Open site"
+                        >
+                            <ExternalLink size={18} />
+                        </a>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Your site is always available at this URL.</p>
+                </div>
+
+                {/* Custom Domain */}
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <Globe size={14} className="inline mr-1" />
+                        Custom Domain
+                    </label>
+                    <input
+                        name="customDomain"
+                        type="text"
+                        defaultValue={site.customDomain || ""}
+                        placeholder="yourdomain.com"
+                        className="w-full p-2 border rounded focus:ring-black focus:border-black font-mono text-sm"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                        Enter your custom domain without &quot;https://&quot; or &quot;www.&quot;
+                    </p>
+                </div>
+
+                {/* DNS Instructions */}
+                {site.customDomain && (
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-start gap-2">
+                            <Info size={16} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                            <div className="text-sm">
+                                <p className="font-medium text-blue-800 mb-2">DNS Configuration Required</p>
+                                <p className="text-blue-700 mb-2">Point your domain to our servers by adding one of these DNS records:</p>
+                                <div className="bg-white p-3 rounded border border-blue-100 font-mono text-xs space-y-1">
+                                    <p><span className="text-gray-500">Type:</span> CNAME</p>
+                                    <p><span className="text-gray-500">Name:</span> @ or www</p>
+                                    <p><span className="text-gray-500">Value:</span> cname.vercel-dns.com</p>
+                                </div>
+                                <p className="text-blue-600 mt-2 text-xs">DNS changes may take up to 48 hours to propagate.</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <hr className="my-8" />
