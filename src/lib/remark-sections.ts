@@ -41,31 +41,26 @@ export function remarkSections() {
                 if (node.name === 'section') {
                     const layout = attributes.layout || '100';
 
-                    let gridClass = 'grid gap-12 w-full';
-                    // Define layouts
+                    // Always base grid on 12 columns
+                    const gridClass = 'grid gap-6 w-full grid-cols-12 ';
 
                     const parts = layout.split('-');
-                    const isAllNumbers = parts.every((p: string) => !isNaN(Number(p)));
-                    const isValidCount = parts.length > 0 && parts.length <= 4;
 
-                    if (isValidCount && isAllNumbers) {
-                        // Check if all parts are equal numbers (e.g., 50-50, 33-33-33)
-                        const isEqual = parts.every((p: string) => p === parts[0]);
+                    // Calculate spans based on percentage parts
+                    // e.g. "33" -> 4 (approx 33% of 12)
+                    // "50" -> 6
+                    // "100" -> 12
+                    const spans = parts.map((p: string) => {
+                        const n = parseInt(p);
+                        if (isNaN(n)) return 12;
+                        return Math.round((n / 100) * 12);
+                    });
 
-                        if (isEqual) {
-                            gridClass += ` md:grid-cols-${parts.length}`;
-                        } else {
-                            gridClass += ' md:grid-cols-[' + parts.map((p: string) => `${p}%`).join('_') + ']';
-                            // Desktop variable for potential JS usage or custom CSS
-                            const template = parts.map((p: string) => `${p}%`).join(' ');
-                            addStyle(`--desktop-layout: ${template}`);
-                        }
-                    } else {
-                        // Fallback
-                        gridClass += ' md:grid-cols-1';
-                    }
+                    // Desktop variable for potential JS usage (preserving existing logic)
+                    const template = parts.map((p: string) => `${p}%`).join(' ');
+                    addStyle(`--desktop-layout: ${template}`);
 
-                    // Extract logic-only attributes to avoid passing them to the DOM
+                    // Extract logic-only attributes
                     const { layout: _l, align: _a, bg: _b, ...domAttributes } = attributes;
 
                     const isTopLevel = parent && parent.type === 'root';
@@ -82,6 +77,46 @@ export function remarkSections() {
                     }
 
                     const originalChildren = node.children || [];
+
+                    // Define responsive column spans map to ensure Tailwind generates these classes
+                    const colSpans: Record<number, string> = {
+                        1: 'md:col-span-1',
+                        2: 'md:col-span-2',
+                        3: 'md:col-span-3',
+                        4: 'md:col-span-4',
+                        5: 'md:col-span-5',
+                        6: 'md:col-span-6',
+                        7: 'md:col-span-7',
+                        8: 'md:col-span-8',
+                        9: 'md:col-span-9',
+                        10: 'md:col-span-10',
+                        11: 'md:col-span-11',
+                        12: 'md:col-span-12',
+                    };
+
+                    // Wrap children in col-span containers
+                    let elementIndex = 0;
+                    const processedChildren = originalChildren.map((child: any) => {
+                        // Skip wrapping text nodes (presumed whitespace) to avoid creating anonymous grid items for newlines
+                        if (child.type === 'text') return child;
+
+                        const span = spans[elementIndex % spans.length];
+                        const colSpanClass = colSpans[span] || 'md:col-span-12';
+                        elementIndex++;
+
+                        return {
+                            type: 'containerDirective',
+                            name: 'wrapper',
+                            data: {
+                                hName: 'div',
+                                hProperties: {
+                                    className: `${colSpanClass} ${alignClass}`.trim()
+                                }
+                            },
+                            children: [child]
+                        };
+                    });
+
                     node.children = [{
                         type: 'containerDirective',
                         data: {
@@ -90,7 +125,7 @@ export function remarkSections() {
                                 className: isTopLevel ? `max-w-6xl mx-auto ${gridClass} ${alignClass}`.trim() : `${gridClass} ${alignClass}`.trim()
                             }
                         },
-                        children: originalChildren
+                        children: processedChildren
                     }];
                 }
 
