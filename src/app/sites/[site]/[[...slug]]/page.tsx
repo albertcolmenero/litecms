@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, X, Linkedin, Facebook, Instagram, Youtube, Github, Link as LinkIcon } from "lucide-react";
+import Script from "next/script";
 
 function SiteSocialIcon({ platform }: { platform: string }) {
     switch (platform.toLowerCase()) {
@@ -17,6 +18,42 @@ function SiteSocialIcon({ platform }: { platform: string }) {
         default: return <LinkIcon size={20} />;
     }
 }
+
+const parseScriptTag = (scriptString: string) => {
+    // Basic check for script tag
+    const trimmed = scriptString.trim();
+    if (!trimmed.startsWith('<script') || !trimmed.endsWith('</script>')) {
+        return null;
+    }
+
+    try {
+        // Extract attributes
+        const openTagMatch = trimmed.match(/<script([^>]+)>/);
+        if (!openTagMatch) return null;
+
+        const attributesString = openTagMatch[1];
+        const attributes: Record<string, string> = {};
+
+        // Regex to capture attributes (foo="bar" or foo='bar' or foo)
+        const attrRegex = /([a-zA-Z0-9-]+)(?:=(?:"([^"]*)"|'([^']*)'))?/g;
+        let match;
+        while ((match = attrRegex.exec(attributesString)) !== null) {
+            const key = match[1];
+            const value = match[2] || match[3] || "";
+            attributes[key] = value;
+        }
+
+        // Extract content between tags
+        const contentMatch = trimmed.match(/>([\s\S]*?)<\/script>/);
+        const content = contentMatch ? contentMatch[1] : "";
+
+        return { attributes, content };
+    } catch (e) {
+        return null;
+    }
+};
+
+
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import matter from "gray-matter";
 import { Metadata } from "next";
@@ -98,6 +135,7 @@ export default async function PublicSitePage({ params }: { params: Promise<{ sit
 
     // Prepare styles from settings
     const settings = siteData.settings as any;
+    const scripts = settings?.scripts || [];
     const themeColors = settings?.theme?.colors || {};
     // Default styles if not set
     const styleVariables = {
@@ -151,8 +189,64 @@ export default async function PublicSitePage({ params }: { params: Promise<{ sit
 
     return (
         <div style={styleVariables} className="min-h-screen bg-[var(--theme-background)] text-[var(--theme-text)] transition-colors duration-200">
+            {scripts.map((script: any) => {
+                console.log("script: ", script);
+                if (script.type === 'url') {
+                    return (
+                        <Script
+                            key={script.id}
+                            src={script.value}
+                            strategy="afterInteractive"
+                            defer
+                        />
+                    );
+                }
+
+                // Try to parse as a script tag
+                const parsed = parseScriptTag(script.value);
+                console.log("parsed: ", parsed);
+                if (parsed) {
+                    const { attributes, content } = parsed;
+                    // If it has a src, use it. Pass remaining attributes.
+                    if (attributes.src) {
+                        return (
+                            <Script
+                                key={script.id}
+                                strategy="afterInteractive"
+                                {...attributes}
+                                defer
+                            />
+                        );
+                    } else {
+                        // Inline script with potential attributes
+                        return (
+                            <Script
+                                key={script.id}
+                                id={script.id}
+                                strategy="afterInteractive"
+                                {...attributes}
+                                defer
+                            >
+                                {content}
+                            </Script>
+                        );
+                    }
+                }
+
+                // Fallback: regular inline code
+                return (
+                    <Script
+                        key={script.id}
+                        id={script.id}
+                        strategy="afterInteractive"
+                        defer
+                    >
+                        {script.value}
+                    </Script>
+                );
+            })}
             <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800">
-                <div className="max-w-6xl mx-auto">
+                <div className="max-w-6xl mx-auto px-6">
                     <div className="relative flex justify-between items-center h-16">
                         <a href="/" className="font-bold text-xl hover:opacity-80">{siteData.name}</a>
                         <nav className="hidden md:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 space-x-8">

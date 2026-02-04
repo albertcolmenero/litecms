@@ -3,7 +3,7 @@
 import { updateSite } from "@/app/actions";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { Save, Plus, Trash, ExternalLink, Globe, Info } from "lucide-react";
+import { Save, Plus, Trash, ExternalLink, Globe, Info, Code, FileCode } from "lucide-react";
 
 const FONT_OPTIONS = [
     "Geist",
@@ -39,6 +39,10 @@ export default function SiteSettingsForm({ site }: SiteSettingsFormProps) {
 
     const [customColors, setCustomColors] = useState<{ id: string; value: string }[]>(
         (site.settings?.theme?.customColors as { id: string; value: string }[]) || []
+    );
+
+    const [scripts, setScripts] = useState<{ id: string; name: string; type: "url" | "code"; value: string }[]>(
+        (site.settings?.scripts as { id: string; name: string; type: "url" | "code"; value: string }[]) || []
     );
 
     const handleSubmit = async (formData: FormData) => {
@@ -87,7 +91,8 @@ export default function SiteSettingsForm({ site }: SiteSettingsFormProps) {
                     secondaryText: themeButtonSecondaryText,
                 },
                 customColors: customColors
-            }
+            },
+            scripts: scripts
         };
         data.settings = newSettings;
 
@@ -116,6 +121,22 @@ export default function SiteSettingsForm({ site }: SiteSettingsFormProps) {
         const newColors = [...customColors];
         newColors[index] = { ...newColors[index], [field]: newValue };
         setCustomColors(newColors);
+    };
+
+    const addScript = () => {
+        setScripts([...scripts, { id: `script-${Date.now()}`, name: "New Script", type: "code", value: "" }]);
+    };
+
+    const removeScript = (index: number) => {
+        const newScripts = [...scripts];
+        newScripts.splice(index, 1);
+        setScripts(newScripts);
+    };
+
+    const updateScript = (index: number, field: "name" | "type" | "value", newValue: string) => {
+        const newScripts = [...scripts];
+        newScripts[index] = { ...newScripts[index], [field]: newValue };
+        setScripts(newScripts);
     };
 
     return (
@@ -156,6 +177,111 @@ export default function SiteSettingsForm({ site }: SiteSettingsFormProps) {
                         </option>
                     ))}
                 </select>
+            </div>
+
+            <hr className="my-8" />
+
+            {/* Scripts Section */}
+            <div>
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold">Custom Scripts</h2>
+                    <button
+                        type="button"
+                        onClick={addScript}
+                        className="text-xs bg-black hover:bg-gray-800 text-white px-3 py-2 rounded flex items-center gap-2 transition-colors"
+                    >
+                        <Plus size={14} /> Add Script
+                    </button>
+                </div>
+
+                <p className="text-sm text-gray-500 mb-6">
+                    Add custom scripts to your site (e.g. Google Analytics, Chat Widgets, etc.).
+                    Scripts are injected into the head/body of your public site.
+                </p>
+
+                <div className="space-y-4">
+                    {scripts.length === 0 && (
+                        <div className="p-8 border-2 border-dashed border-gray-200 rounded-xl text-center">
+                            <Code className="mx-auto h-10 w-10 text-gray-300 mb-3" />
+                            <p className="text-gray-500 font-medium">No scripts added yet</p>
+                            <p className="text-sm text-gray-400 mt-1">Click "Add Script" to get started</p>
+                        </div>
+                    )}
+
+                    {scripts.map((script, index) => (
+                        <div key={script.id || index} className="p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-4">
+                            <div className="flex justify-between items-start gap-4">
+                                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Name */}
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Script Name</label>
+                                        <input
+                                            type="text"
+                                            value={script.name}
+                                            onChange={(e) => updateScript(index, 'name', e.target.value)}
+                                            placeholder="e.g. Google Analytics"
+                                            className="w-full text-sm p-2 border rounded focus:ring-black focus:border-black"
+                                        />
+                                    </div>
+
+                                    {/* Type */}
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Type</label>
+                                        <div className="flex bg-white rounded border p-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => updateScript(index, 'type', 'url')}
+                                                className={`flex-1 flex items-center justify-center gap-2 px-3 py-1.5 rounded text-xs font-medium transition-all ${script.type === 'url' ? 'bg-black text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'}`}
+                                            >
+                                                <ExternalLink size={12} /> URL Source
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => updateScript(index, 'type', 'code')}
+                                                className={`flex-1 flex items-center justify-center gap-2 px-3 py-1.5 rounded text-xs font-medium transition-all ${script.type === 'code' ? 'bg-black text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'}`}
+                                            >
+                                                <FileCode size={12} /> Inline Code
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={() => removeScript(index)}
+                                    className="text-gray-400 hover:text-red-600 p-1 transition-colors mt-6"
+                                    title="Remove Script"
+                                >
+                                    <Trash size={18} />
+                                </button>
+                            </div>
+
+                            {/* Value Input */}
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">
+                                    {script.type === 'url' ? 'Script URL (src)' : 'Script Code'}
+                                </label>
+                                {script.type === 'url' ? (
+                                    <input
+                                        type="url"
+                                        value={script.value}
+                                        onChange={(e) => updateScript(index, 'value', e.target.value)}
+                                        placeholder="https://example.com/script.js"
+                                        className="w-full text-sm p-2 border rounded font-mono text-gray-600 focus:ring-black focus:border-black"
+                                    />
+                                ) : (
+                                    <textarea
+                                        value={script.value}
+                                        onChange={(e) => updateScript(index, 'value', e.target.value)}
+                                        placeholder="console.log('Hello');"
+                                        rows={4}
+                                        className="w-full text-sm p-2 border rounded font-mono text-gray-600 focus:ring-black focus:border-black bg-white"
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             <hr className="my-8" />
