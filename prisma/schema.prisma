@@ -87,11 +87,14 @@ model Asset {
   id        String   @id @default(cuid())
   key       String
   url       String
+  filename  String
+  mimeType  String?
+  size      Int?
   alt       String?
   createdAt DateTime @default(now())
   siteId    String
   site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  
+
   @@index([siteId])
 }
 

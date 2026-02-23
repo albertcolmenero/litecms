@@ -84,6 +84,7 @@ export default function BlogPostEditor({ params, post, site }: { params: any, po
                     initialValue={content}
                     onChange={handleUpdate}
                     site={site}
+                    siteId={site.id}
                 />
             </div>
         </div>

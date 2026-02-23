@@ -84,6 +84,7 @@ export default function EditorClient({
                         initialValue={page.content || ""}
                         onChange={handleUpdate}
                         site={site}
+                        siteId={siteId}
                     />
                 </div>
             </main>

@@ -42,7 +42,7 @@ export function remarkSections() {
                     const layout = attributes.layout || '100';
 
                     // Always base grid on 12 columns
-                    const gridClass = 'grid gap-6 w-full grid-cols-12 ';
+                    const gridClass = 'grid gap-6 w-full grid-cols-1 md:grid-cols-12 ';
 
                     const parts = layout.split('-');
 

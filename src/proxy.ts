@@ -26,6 +26,12 @@ export default clerkMiddleware(async (auth, req) => {
       return NextResponse.next();
     }
 
+    // Exclude API routes from rewrite so /api/* works on app subdomain
+    if (url.pathname.startsWith("/api")) {
+      console.log(`[Proxy] API request on app subdomain: ${url.pathname} - Passing through`);
+      return NextResponse.next();
+    }
+
     // Exclude public auth routes from rewrite
     if (url.pathname.startsWith("/sign-in") || url.pathname.startsWith("/sign-up")) {
       console.log(`[Proxy] Skipping rewrite for auth path: ${url.pathname}`);

@@ -40,6 +40,12 @@ export default async function SiteDetailPage({ params }: { params: Promise<{ id:
 
                     <div className="flex items-center gap-3">
                         <Link
+                            href={`/app/site/${site.id}/media`}
+                            className="px-4 py-2 bg-white border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-sm"
+                        >
+                            Media
+                        </Link>
+                        <Link
                             href={`/app/site/${site.id}/forms`}
                             className="px-4 py-2 bg-white border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-sm"
                         >
