@@ -68,11 +68,11 @@ export default function CreateFormModal({ siteId }: { siteId: string }) {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-500">Form Type</label>
+                        <label className="text-sm font-medium text-gray-500">Default Setup</label>
                         <div className="px-3 py-2 border rounded-lg bg-gray-50 text-gray-500 text-sm dark:bg-neutral-800 dark:border-neutral-700">
-                            Waitlist (Email Only)
+                            CTA: Submit, one email field
                         </div>
-                        <p className="text-xs text-gray-400">More form types coming soon.</p>
+                        <p className="text-xs text-gray-400">You can edit fields and settings after creating the form.</p>
                     </div>
 
                     <div className="flex justify-end gap-2 pt-2 create-form-actions">

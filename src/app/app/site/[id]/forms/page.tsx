@@ -1,6 +1,6 @@
-import { getForms, deleteForm } from "@/app/actions-forms";
+import { getForms } from "@/app/actions-forms";
 import CreateFormModal from "@/components/forms/CreateFormModal";
-import { ArrowLeft, Copy, Trash2, FileText, Users } from "lucide-react";
+import { ArrowLeft, FileText, Users, Settings } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSite } from "@/app/actions";
@@ -24,7 +24,7 @@ export default async function FormsPage({ params }: { params: Promise<{ id: stri
                             <ArrowLeft size={16} className="mr-1" /> Back to Site
                         </Link>
                         <h1 className="text-3xl font-bold tracking-tight text-gray-900">Forms</h1>
-                        <p className="text-gray-500">Manage your site's forms and waitlists.</p>
+                        <p className="text-gray-500">Manage your site&apos;s forms and submissions.</p>
                     </div>
                 </header>
 
@@ -51,10 +51,11 @@ export default async function FormsPage({ params }: { params: Promise<{ id: stri
                                             <th className="px-6 py-4 font-medium text-gray-500">Embed Code</th>
                                             <th className="px-6 py-4 font-medium text-gray-500">Leads</th>
                                             <th className="px-6 py-4 font-medium text-gray-500">Created</th>
+                                            <th className="px-6 py-4 font-medium text-gray-500">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
-                                        {forms.map((form: any) => (
+                                        {forms.map((form) => (
                                             <tr key={form.id} className="hover:bg-gray-50/50">
                                                 <td className="px-6 py-4 font-medium text-gray-900">{form.name}</td>
                                                 <td className="px-6 py-4">
@@ -78,6 +79,15 @@ export default async function FormsPage({ params }: { params: Promise<{ id: stri
                                                 </td>
                                                 <td className="px-6 py-4 text-gray-500">
                                                     {new Date(form.createdAt).toLocaleDateString()}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <Link
+                                                        href={`/app/site/${id}/forms/${form.id}`}
+                                                        className="inline-flex items-center gap-1 text-sm text-gray-700 hover:text-black"
+                                                    >
+                                                        <Settings size={14} />
+                                                        Edit
+                                                    </Link>
                                                 </td>
                                             </tr>
                                         ))}

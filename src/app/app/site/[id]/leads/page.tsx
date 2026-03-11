@@ -41,14 +41,20 @@ export default async function LeadsPage({ params }: { params: Promise<{ id: stri
                                         <tr>
                                             <th className="px-6 py-4 font-medium text-gray-500">Email</th>
                                             <th className="px-6 py-4 font-medium text-gray-500">Form</th>
+                                            <th className="px-6 py-4 font-medium text-gray-500">Submission Data</th>
                                             <th className="px-6 py-4 font-medium text-gray-500">Date</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
-                                        {leads.map((lead: any) => (
+                                        {leads.map((lead) => (
                                             <tr key={lead.id} className="hover:bg-gray-50/50">
-                                                <td className="px-6 py-4 font-medium text-gray-900">{lead.email}</td>
+                                                <td className="px-6 py-4 font-medium text-gray-900">{lead.email || '—'}</td>
                                                 <td className="px-6 py-4 text-gray-500">{lead.form.name}</td>
+                                                <td className="px-6 py-4 text-xs text-gray-500 max-w-sm">
+                                                    <pre className="whitespace-pre-wrap wrap-break-word bg-gray-50 rounded p-2 border border-gray-100">
+                                                        {lead.data ? JSON.stringify(lead.data, null, 2) : '—'}
+                                                    </pre>
+                                                </td>
                                                 <td className="px-6 py-4 text-gray-500 flex items-center gap-2">
                                                     <Calendar size={14} />
                                                     {new Date(lead.createdAt).toLocaleString()}

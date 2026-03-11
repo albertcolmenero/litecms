@@ -21,7 +21,7 @@ Inside sections, use \`:::column\` to wrap content.
 ### Components
 - **Cards**: \`:::card\` wraps content in a styled card.
 - **Buttons**: \`::button[Label]{href="#" variant="primary|secondary"}\`
-- **Forms**: \`::form{id="FORM_ID"}\`
+- **Forms**: \`::form{id="FORM_ID"}\` (fields and CTA are configured in Forms editor)
 - **Blog Posts**: \`::blog-posts{count="3"}\`
 - **Spacers**: \`::breakline{height="4rem"}\`
 - **Icons**: \`::icon{name="IconName"}\` (Lucide icon names)
@@ -171,6 +171,7 @@ Card content goes here.
                             <div className="bg-gray-100 p-2 rounded font-mono text-xs whitespace-pre overflow-x-auto border">
                                 {`::form{id="your-form-id"}`}
                             </div>
+                            <p className="mt-1 text-xs text-gray-500">Tip: customize fields, order, required state, CTA text, and forwarding URL from the Forms page.</p>
                         </div>
 
                         <div>
