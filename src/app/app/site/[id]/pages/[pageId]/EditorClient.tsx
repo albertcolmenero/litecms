@@ -34,7 +34,7 @@ export default function EditorClient({
   const [publishPending, startPublishTransition] = useTransition();
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [content, setContent] = useState<string>(page.content || "");
-  const [mode, setMode] = useState<Mode>("wysiwyg");
+  const [mode, setMode] = useState<Mode>("source");
 
   const handleUpdate = useCallback(
     async (markdown: string) => {
@@ -128,8 +128,11 @@ export default function EditorClient({
         {mode === "wysiwyg" ? (
           <WysiwygEditor source={content} site={site} onChange={handleUpdate} />
         ) : (
+          // Don't put a content-derived `key` here — it would force a remount
+          // (and focus loss) on every keystroke. The Editor manages its own
+          // internal state from `initialValue` on mount; switching modes
+          // unmounts/remounts naturally because the JSX branch changes.
           <Editor
-            key={content.length /* re-mount only when content snapshot really changes externally */}
             initialValue={content}
             onChange={handleUpdate}
             site={site}
@@ -145,19 +148,6 @@ function ModeToggle({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => void 
   return (
     <div className="hidden md:flex items-center gap-0.5 rounded-md border border-border p-0.5">
       <button
-        onClick={() => setMode("wysiwyg")}
-        className={cn(
-          "flex h-7 items-center gap-1 rounded px-2 text-xs font-medium",
-          mode === "wysiwyg"
-            ? "bg-foreground text-background"
-            : "text-muted-foreground hover:bg-accent",
-        )}
-        title="Visual editor"
-      >
-        <Sparkles className="h-3.5 w-3.5" />
-        WYSIWYG
-      </button>
-      <button
         onClick={() => setMode("source")}
         className={cn(
           "flex h-7 items-center gap-1 rounded px-2 text-xs font-medium",
@@ -169,6 +159,19 @@ function ModeToggle({ mode, setMode }: { mode: Mode; setMode: (m: Mode) => void 
       >
         <CodeIcon className="h-3.5 w-3.5" />
         Source
+      </button>
+      <button
+        onClick={() => setMode("wysiwyg")}
+        className={cn(
+          "flex h-7 items-center gap-1 rounded px-2 text-xs font-medium",
+          mode === "wysiwyg"
+            ? "bg-foreground text-background"
+            : "text-muted-foreground hover:bg-accent",
+        )}
+        title="Visual editor"
+      >
+        <Sparkles className="h-3.5 w-3.5" />
+        WYSIWYG
       </button>
     </div>
   );

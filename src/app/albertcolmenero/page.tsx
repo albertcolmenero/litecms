@@ -1,11 +1,28 @@
 import Link from "next/link";
+import { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Github, Linkedin, Mail, Twitter, ExternalLink, Calendar, Briefcase, Info } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 
-export const metadata = {
-    title: "Albert Colmenero | SaaS Builder & GTM Expert",
-    description: "Personal website of Albert Colmenero. SaaS builder, operator, and expert in GTM strategy and product-led growth.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const site = await prisma.site.findFirst({
+        where: {
+            OR: [
+                { customDomain: "albertcolmenero.com" },
+                { subdomain: "albertcolmenero" },
+            ],
+        },
+        select: { settings: true },
+    });
+
+    const faviconUrl = (site?.settings as any)?.faviconUrl;
+
+    return {
+        title: "Albert Colmenero | SaaS Builder & GTM Expert",
+        description: "Personal website of Albert Colmenero. SaaS builder, operator, and expert in GTM strategy and product-led growth.",
+        ...(faviconUrl ? { icons: { icon: faviconUrl } } : {}),
+    };
+}
 
 export default function PersonalPage() {
     return (
