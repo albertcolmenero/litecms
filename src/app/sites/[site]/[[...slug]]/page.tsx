@@ -119,9 +119,12 @@ export async function generateMetadata({ params }: { params: Promise<{ site: str
         };
     }
 
+    const faviconUrl = (data.siteData.settings as any)?.faviconUrl;
+
     return {
         title: data.pageData.title,
         description: data.pageData.description || `${data.siteData.name} - ${data.pageData.title}`,
+        ...(faviconUrl ? { icons: { icon: faviconUrl } } : {}),
     };
 }
 

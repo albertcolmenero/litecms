@@ -255,6 +255,14 @@ export function remarkSections() {
                         count: attributes.count ? parseInt(attributes.count) : 3,
                     };
                 }
+
+                // Badge Directive (rounded pill: optional icon + label + optional link)
+                if (node.name === 'badge') {
+                    data.hName = 'badge-component';
+                    data.hProperties = {
+                        ...attributes,
+                    };
+                }
             }
         });
     };

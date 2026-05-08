@@ -6,15 +6,18 @@ import remarkDirective from "remark-directive";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { remarkSections } from "@/lib/remark-sections";
+import { remarkSourcePositions } from "@/lib/remark-source-positions";
 import matter from "gray-matter";
 import * as LucideIcons from "lucide-react";
 import Form from "@/components/mdx/Form";
 import BlogPosts from "@/components/mdx/BlogPosts";
+import Badge from "@/components/mdx/Badge";
 
 interface MarkdownRendererProps {
     content: string;
     className?: string;
     site?: any; // We'll type this loosely for now as per codebase convention
+    enableSourcePositions?: boolean;
 }
 
 // Helper to convert kebab-case to PascalCase (e.g. "arrow-right" -> "ArrowRight")
@@ -57,9 +60,13 @@ const IconComponent = ({ node, name, className, ...props }: any) => {
     );
 };
 
-export function MarkdownRenderer({ content, className, site }: MarkdownRendererProps) {
+export function MarkdownRenderer({ content, className, site, enableSourcePositions }: MarkdownRendererProps) {
     // Parse frontmatter and get content
     const { content: markdownBody } = matter(content || "");
+
+    const remarkPlugins = enableSourcePositions
+        ? [remarkGfm, remarkDirective, remarkSections, remarkSourcePositions]
+        : [remarkGfm, remarkDirective, remarkSections];
 
     // Generate CSS variables from site settings
     const theme = site?.settings?.theme || {};
@@ -84,7 +91,7 @@ export function MarkdownRenderer({ content, className, site }: MarkdownRendererP
     return (
         <div className={className} style={styleVariables}>
             <ReactMarkdown
-                remarkPlugins={[remarkGfm, remarkDirective, remarkSections]}
+                remarkPlugins={remarkPlugins}
                 rehypePlugins={[rehypeRaw]}
                 components={{
                     // Styles for directives are handled by remarkSections transforming directly to div with classes
@@ -97,6 +104,7 @@ export function MarkdownRenderer({ content, className, site }: MarkdownRendererP
                     "icon-component": IconComponent,
                     "form-component": Form,
                     "blog-posts-component": (props: any) => <BlogPosts {...props} siteId={site?.id} />,
+                    "badge-component": Badge,
                 } as any}
             >
                 {markdownBody}

@@ -142,9 +142,13 @@ export async function updateBlogPost(siteId: string, postId: string, content: st
             description: frontmatter.description,
             image: frontmatter.image,
             author: frontmatter.author,
-            published: frontmatter.published === true || frontmatter.published === "true",
             publishedAt: frontmatter.date ? new Date(frontmatter.date) : null,
         };
+
+        if ("published" in frontmatter) {
+            updateData.published =
+                frontmatter.published === true || frontmatter.published === "true";
+        }
 
         // If slug is updated in frontmatter, try to update it
         if (frontmatter.slug) {
@@ -161,6 +165,37 @@ export async function updateBlogPost(siteId: string, postId: string, content: st
     } catch (e) {
         console.error(e);
         return { error: "Failed to update post. Slug might be taken." };
+    }
+}
+
+export async function setBlogPostPublished(
+    siteId: string,
+    postId: string,
+    published: boolean,
+) {
+    const user = await currentUser();
+    if (!user) return { error: "Unauthorized" };
+
+    const site = await prisma.site.findUnique({
+        where: { id: siteId },
+        include: { user: true },
+    });
+
+    if (!site || site.user.clerkId !== user.id) return { error: "Unauthorized" };
+
+    try {
+        await prisma.blogPost.update({
+            where: { id: postId },
+            data: {
+                published,
+                publishedAt: published ? new Date() : null,
+            },
+        });
+        revalidatePath(`/app/site/${siteId}/blog`);
+        return { success: true };
+    } catch (e) {
+        console.error(e);
+        return { error: "Failed to update publish state" };
     }
 }
 

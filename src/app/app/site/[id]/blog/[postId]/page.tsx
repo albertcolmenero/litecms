@@ -1,14 +1,16 @@
-import { getBlogPost } from "@/actions/blog";
 import { notFound } from "next/navigation";
-import BlogPostEditor from "./client";
+import { getBlogPost } from "@/actions/blog";
+import BlogEditorClient from "./EditorClient";
 
-export default async function BlogPostPage({ params }: { params: Promise<{ id: string; postId: string }> }) {
-    const { id: siteId, postId } = await params;
+export default async function BlogEditorRoute({
+  params,
+}: {
+  params: Promise<{ id: string; postId: string }>;
+}) {
+  const { id: siteId, postId } = await params;
+  const post = await getBlogPost(postId);
+  if (!post) notFound();
+  if (post.siteId !== siteId) notFound();
 
-    // Fetch data
-    const post = await getBlogPost(postId);
-
-    if (!post) return notFound();
-
-    return <BlogPostEditor params={params} post={post} site={post.site} />;
+  return <BlogEditorClient siteId={siteId} site={post.site} post={post} />;
 }

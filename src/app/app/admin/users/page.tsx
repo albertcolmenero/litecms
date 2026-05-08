@@ -1,58 +1,48 @@
+import { PageHeader } from "@/components/dashboard/PageHeader";
+import { StatPill } from "@/components/dashboard/StatPill";
 import { getUsers } from "@/app/actions";
 
 export default async function AdminUsersPage() {
-    const users = await getUsers();
+  const users = await getUsers();
 
-    return (
-        <div className="flex flex-col space-y-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold tracking-tight">All Users</h1>
-                <div className="text-sm text-muted-foreground">
-                    Total: {users.length}
-                </div>
-            </div>
-
-            <div className="border rounded-md">
-                <table className="w-full text-sm text-left">
-                    <thead className="text-muted-foreground bg-muted/50 border-b">
-                        <tr>
-                            <th className="px-4 py-3 font-medium">Email</th>
-                            <th className="px-4 py-3 font-medium">Role</th>
-                            <th className="px-4 py-3 font-medium">Clerk ID</th>
-                            <th className="px-4 py-3 font-medium">Sites</th>
-                            <th className="px-4 py-3 font-medium">Joined</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                        {users.map((user) => (
-                            <tr key={user.id} className="hover:bg-muted/50 transition-colors">
-                                <td className="px-4 py-3 font-medium">
-                                    {user.email}
-                                </td>
-                                <td className="px-4 py-3">
-                                    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${user.role === 'SUPER_ADMIN'
-                                            ? 'border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80'
-                                            : 'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                                        }`}>
-                                        {user.role}
-                                    </span>
-                                </td>
-                                <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                                    {user.clerkId}
-                                </td>
-                                <td className="px-4 py-3">
-                                    <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
-                                        {(user as any)._count?.sites || 0}
-                                    </span>
-                                </td>
-                                <td className="px-4 py-3 text-muted-foreground text-xs">
-                                    {new Date(user.createdAt).toLocaleDateString()}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    );
+  return (
+    <>
+      <PageHeader
+        title="All users"
+        description={`${users.length} user${users.length === 1 ? "" : "s"} across the platform.`}
+      />
+      <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border bg-muted/30 text-left text-xs uppercase tracking-wide text-muted-foreground">
+              <th className="px-5 py-2.5 font-medium">Email</th>
+              <th className="px-5 py-2.5 font-medium">Role</th>
+              <th className="px-5 py-2.5 font-medium">Sites</th>
+              <th className="px-5 py-2.5 font-medium">Clerk ID</th>
+              <th className="px-5 py-2.5 font-medium">Joined</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {users.map((user) => (
+              <tr key={user.id} className="hover:bg-muted/30 transition-colors">
+                <td className="px-5 py-3 font-medium">{user.email}</td>
+                <td className="px-5 py-3">
+                  <StatPill tone={user.role === "SUPER_ADMIN" ? "info" : "neutral"}>
+                    {user.role}
+                  </StatPill>
+                </td>
+                <td className="px-5 py-3">
+                  <StatPill tone="neutral">{(user as any)._count?.sites ?? 0}</StatPill>
+                </td>
+                <td className="px-5 py-3 font-mono text-xs text-muted-foreground">{user.clerkId}</td>
+                <td className="px-5 py-3 text-xs text-muted-foreground">
+                  {new Date(user.createdAt).toLocaleDateString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
 }

@@ -1,4 +1,14 @@
-main menu to include CTAs
+[v] - main menu to include CTAs
+[] - favicon
+[] - badges
+[] - align forms center
+[] - links to optionally open in a new tab
+----
+lite-forms.com
+
+- header
+- replicate hero from /lite-forms
+
 
 
 

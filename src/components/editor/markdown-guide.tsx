@@ -21,6 +21,7 @@ Inside sections, use \`:::column\` to wrap content.
 ### Components
 - **Cards**: \`:::card\` wraps content in a styled card.
 - **Buttons**: \`::button[Label]{href="#" variant="primary|secondary"}\`
+- **Badges**: \`::badge[Label]{icon="Sparkles" iconColor="#f59e0b" link="/x" linkLabel="Read more" variant="default|subtle"}\` — rounded pill; all attributes optional.
 - **Forms**: \`::form{id="FORM_ID"}\` (fields and CTA are configured in Forms editor)
 - **Blog Posts**: \`::blog-posts{count="3"}\`
 - **Spacers**: \`::breakline{height="4rem"}\`
@@ -164,6 +165,33 @@ Card content goes here.
                                 {`::button[Primary]{href = "/contact"}
 ::button[Secondary]{href = "/about" variant="secondary"}`}
                             </div>
+                        </div>
+
+                        <div>
+                            <p className="mb-1 font-medium text-xs">Badge (rounded pill)</p>
+                            <p className="mb-1 text-xs text-gray-500">
+                                A small pill with optional icon, label, and CTA link. All four attributes (<code>icon</code>, <code>iconColor</code>, <code>link</code>, <code>linkLabel</code>) are independently optional.
+                            </p>
+                            <div className="bg-gray-100 p-2 rounded font-mono text-xs whitespace-pre overflow-x-auto border">
+                                {`::badge[New: AI-Powered Layouts]{icon="Sparkles" iconColor="#f59e0b" link="/whats-new" linkLabel="Read more"}
+
+::badge[Just shipped: Forms 2.0]{icon="Rocket" iconColor="#6366f1" link="/blog/forms-2"}
+
+::badge[v1.4 is out]{icon="Tag" iconColor="primary"}
+
+::badge[Limited beta]{link="/signup" linkLabel="Join waitlist"}
+
+::badge[Powered by lite-cms]
+
+::badge[Subscribe for updates]{icon="Mail" iconColor="#10b981" variant="subtle"}`}
+                            </div>
+                            <ul className="mt-2 list-disc list-inside space-y-0.5 text-xs text-gray-500">
+                                <li><code>icon</code> — Lucide icon name (e.g. <code>Sparkles</code>, <code>Rocket</code>, <code>Mail</code>, <code>Tag</code>).</li>
+                                <li><code>iconColor</code> — hex (<code>#f59e0b</code>) or theme token (<code>primary</code>, custom color id).</li>
+                                <li><code>link</code> — href for the inline CTA on the right.</li>
+                                <li><code>linkLabel</code> — CTA text. Defaults to <code>Read more</code>. Ignored if <code>link</code> is absent.</li>
+                                <li><code>variant</code> — <code>default</code> (white card, hairline border, soft shadow) or <code>subtle</code> (muted bg, no shadow).</li>
+                            </ul>
                         </div>
 
                         <div>
