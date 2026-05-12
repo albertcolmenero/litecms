@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { ArrowLeft, ArrowUpRight, Check, Code as CodeIcon, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { StatPill } from "@/components/dashboard/StatPill";
 import { Editor } from "@/components/editor/editor";
 import { WysiwygEditor } from "@/components/editor/wysiwyg/WysiwygEditor";
+import { AgentPanel } from "@/components/agent/AgentPanel";
 import { updatePage } from "@/app/actions";
 
 type SaveStatus = "saved" | "saving" | "unsaved";
@@ -35,6 +36,20 @@ export default function EditorClient({
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [content, setContent] = useState<string>(page.content || "");
   const [mode, setMode] = useState<Mode>("source");
+  const [chatOpen, setChatOpen] = useState(false);
+
+  // Sync local content with the latest server-side content. The agent writes
+  // directly to the DB, then the AgentPanel calls router.refresh() — that
+  // re-fetches the page server component, which passes a new page.content
+  // prop here. We mirror it into local state so the editor canvas re-renders.
+  // Note: this can fight with in-flight typing; we only sync when there's
+  // a real difference and we're not in the middle of a debounced save.
+  useEffect(() => {
+    if (status === "saving") return;
+    const next = page.content || "";
+    setContent((prev) => (prev === next ? prev : next));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page.content]);
 
   const handleUpdate = useCallback(
     async (markdown: string) => {
@@ -91,6 +106,17 @@ export default function EditorClient({
         <div className="ml-auto flex items-center gap-2">
           <ModeToggle mode={mode} setMode={setMode} />
 
+          <Button
+            variant={chatOpen ? "default" : "outline"}
+            size="sm"
+            onClick={() => setChatOpen((v) => !v)}
+            className={cn(chatOpen && "bg-foreground text-background")}
+            title="Toggle the page-builder agent"
+          >
+            <Sparkles className="mr-1 h-3.5 w-3.5" />
+            Ask agent
+          </Button>
+
           {published ? (
             <StatPill tone="success">Published</StatPill>
           ) : (
@@ -124,21 +150,22 @@ export default function EditorClient({
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 p-3 md:p-4 bg-muted/30">
-        {mode === "wysiwyg" ? (
-          <WysiwygEditor source={content} site={site} onChange={handleUpdate} />
-        ) : (
-          // Don't put a content-derived `key` here — it would force a remount
-          // (and focus loss) on every keystroke. The Editor manages its own
-          // internal state from `initialValue` on mount; switching modes
-          // unmounts/remounts naturally because the JSX branch changes.
-          <Editor
-            initialValue={content}
-            onChange={handleUpdate}
-            site={site}
-            siteId={siteId}
-          />
-        )}
+      <div className="flex flex-1 min-h-0">
+        <div className="flex-1 min-h-0 p-3 md:p-4 bg-muted/30">
+          {mode === "wysiwyg" ? (
+            <WysiwygEditor source={content} site={site} onChange={handleUpdate} />
+          ) : (
+            <Editor
+              initialValue={content}
+              onChange={handleUpdate}
+              site={site}
+              siteId={siteId}
+            />
+          )}
+        </div>
+        {chatOpen ? (
+          <AgentPanel siteId={siteId} pageId={page.id} onClose={() => setChatOpen(false)} />
+        ) : null}
       </div>
     </div>
   );
